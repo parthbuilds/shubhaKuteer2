@@ -3,179 +3,461 @@
 <!--[if (gte IE 9)|!(IE)]><!-->
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US" lang="en-US">
 <!--<![endif]-->
+
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>Coupons Management - Shubha Kuteer Admin</title>
+    <link rel="stylesheet" type="text/css" href="/admin/css/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/admin/css/animation.css">
     <link rel="stylesheet" type="text/css" href="/admin/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="/admin/css/bootstrap-select.min.css">
     <link rel="stylesheet" type="text/css" href="/admin/css/style.css">
+    <link rel="stylesheet" href="/admin/font/fonts.css">
+    <link rel="stylesheet" href="/admin/icon/style.css">
+    <link rel="shortcut icon" href="/admin/images/favicon.png">
+    <script>
+        (async () => {
+            try {
+                const res = await fetch("/api/admin/auth/check", { credentials: "include" });
+                if (!res.ok) window.location.href = "/admin/login.html";
+            } catch {
+                window.location.href = "/admin/login.html";
+            }
+        })();
+    </script>
 </head>
+
 <body class="body">
+
     <div id="wrapper">
-        <div id="page">
+        <div id="page" class="">
             <div class="layout-wrap">
-                <!-- Sidebar -->
-                <div class="section-menu-left">
-                    <div class="box-logo">
-                        <a href="/admin/index.html" id="site-logo-inner">
-                            <span style="font-size: 24px; font-weight: bold; color: #333;">Shubha Kuteer</span>
-                        </a>
-                    </div>
-                    <ul class="menu-list">
-                        <li class="menu-item">
-                            <a href="/admin/index.html" class="menu-item-button">
-                                <div class="icon">📊</div>
-                                <div class="text">Dashboard</div>
-                            </a>
-                        </li>
-                        <li class="menu-item has-children">
-                            <a href="javascript:void(0);" class="menu-item-button">
-                                <div class="icon">🎫</div>
-                                <div class="text">Coupons</div>
-                            </a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="/admin/banners.html" class="menu-item-button">
-                                <div class="icon">🖼️</div>
-                                <div class="text">Banners</div>
-                            </a>
-                        </li>
-                    </ul>
+                <!-- preload -->
+                <div id="preload" class="preload-container">
+                    <div class="preloading"><span></span></div>
                 </div>
 
-                <!-- Main Content -->
+                <!-- section-menu-left -->
+                <div class="section-menu-left">
+                    <div class="box-logo w-120">
+                        <a href="/admin/index.html" id="site-logo-inner">
+                            <img class="" id="logo_header" alt="" src="/admin/images/logo/logo.png"
+                                data-light="images/logo/logo.png" data-dark="images/logo/logo-dark.png">
+                        </a>
+                        <div class="button-show-hide">
+                            <i class="icon-menu-left"></i>
+                        </div>
+                    </div>
+                    <div class="section-menu-left-wrap">
+                        <div class="center">
+                            <div class="center-item">
+                                <div class="center-heading">Main Home</div>
+                                <ul class="menu-list">
+                                    <li class="menu-item has-children">
+                                        <a href="javascript:void(0);" class="menu-item-button">
+                                            <div class="icon"><i class="icon-grid"></i></div>
+                                            <div class="text">Dashboard</div>
+                                        </a>
+                                        <ul class="sub-menu">
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/index.html" class="">
+                                                    <div class="text">Dashboard</div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="center-item">
+                                <div class="center-heading">All page</div>
+                                <ul class="menu-list">
+                                    <li class="menu-item has-children">
+                                        <a href="javascript:void(0);" class="menu-item-button">
+                                            <div class="icon"><i class="icon-shopping-cart"></i></div>
+                                            <div class="text">Ecommerce</div>
+                                        </a>
+                                        <ul class="sub-menu">
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/add-product.html" class="">
+                                                    <div class="text">Add Product</div>
+                                                </a>
+                                            </li>
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/product-list.html" class="">
+                                                    <div class="text">Product List</div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="menu-item has-children">
+                                        <a href="javascript:void(0);" class="menu-item-button">
+                                            <div class="icon"><i class="icon-layers"></i></div>
+                                            <div class="text">Category</div>
+                                        </a>
+                                        <ul class="sub-menu">
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/category-list.html" class="">
+                                                    <div class="text">Category list</div>
+                                                </a>
+                                            </li>
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/new-category.html" class="">
+                                                    <div class="text">New category</div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="menu-item has-children">
+                                        <a href="javascript:void(0);" class="menu-item-button">
+                                            <div class="icon"><i class="icon-box"></i></div>
+                                            <div class="text">Attributes</div>
+                                        </a>
+                                        <ul class="sub-menu">
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/attributes.html" class="">
+                                                    <div class="text">Attributes</div>
+                                                </a>
+                                            </li>
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/add-attributes.html" class="">
+                                                    <div class="text">Add attributes</div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="menu-item has-children">
+                                        <a href="javascript:void(0);" class="menu-item-button">
+                                            <div class="icon"><i class="icon-file-plus"></i></div>
+                                            <div class="text">Order</div>
+                                        </a>
+                                        <ul class="sub-menu">
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/order-list.html" class="">
+                                                    <div class="text">Order list</div>
+                                                </a>
+                                            </li>
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/order-tracking.html" class="">
+                                                    <div class="text">Order tracking</div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="menu-item has-children">
+                                        <a href="javascript:void(0);" class="menu-item-button">
+                                            <div class="icon"><i class="icon-tag"></i></div>
+                                            <div class="text">Marketing</div>
+                                        </a>
+                                        <ul class="sub-menu">
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/banners.html" class="">
+                                                    <div class="text">Banners</div>
+                                                </a>
+                                            </li>
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/coupons.html" class="active">
+                                                    <div class="text">Coupons</div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="menu-item has-children">
+                                        <a href="javascript:void(0);" class="menu-item-button">
+                                            <div class="icon"><i class="icon-user"></i></div>
+                                            <div class="text">User</div>
+                                        </a>
+                                        <ul class="sub-menu">
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/all-user.html" class="">
+                                                    <div class="text">All user</div>
+                                                </a>
+                                            </li>
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/add-new-user.html" class="">
+                                                    <div class="text">Add new user</div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="menu-item">
+                                        <a href="/admin/gallery.html" class="">
+                                            <div class="icon"><i class="icon-image"></i></div>
+                                            <div class="text">Gallery</div>
+                                        </a>
+                                    </li>
+                                    <li class="menu-item">
+                                        <a href="/admin/report.html" class="">
+                                            <div class="icon"><i class="icon-pie-chart"></i></div>
+                                            <div class="text">Report</div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="center-item">
+                                <div class="center-heading">Setting</div>
+                                <ul class="menu-list">
+                                    <li class="menu-item">
+                                        <a href="/admin/setting.html" class="">
+                                            <div class="icon"><i class="icon-settings"></i></div>
+                                            <div class="text">Setting</div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="center-item">
+                                <div class="center-heading">Connect us</div>
+                                <ul class="wg-social">
+                                    <li><a href="#"><i class="icon-facebook"></i></a></li>
+                                    <li class="active"><a href="#"><i class="icon-twitter"></i></a></li>
+                                    <li><a href="#"><i class="icon-linkedin"></i></a></li>
+                                    <li><a href="#"><i class="icon-instagram"></i></a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="bot text-center">
+                            <div class="wrap">
+                                <div class="mb-20">
+                                    <img src="/admin/images/menu-left/img-bot.png" alt="">
+                                </div>
+                                <div class="mb-20">
+                                    <h6>Hi, how can we help?</h6>
+                                    <div class="text">Contact us if you have any assistance, we will contact you as soon as possible</div>
+                                </div>
+                                <a href="mailto:parthbuilds@gmail.com" class="tf-button w-full">Contact</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- section-content-right -->
                 <div class="section-content-right">
+                    <!-- header-dashboard -->
                     <div class="header-dashboard">
-                        <h2>Coupons Management</h2>
-                        <button onclick="showAddModal()" class="tf-button" style="float: right;">+ Add Coupon</button>
+                        <div class="wrap">
+                            <div class="header-left">
+                                <a href="/admin/index.html">
+                                    <img class="" id="logo_header_mobile" alt="" src="/admin/images/logo/logo.png"
+                                        data-light="images/logo/logo.png" data-dark="images/logo/logo-dark.png"
+                                        data-width="154px" data-height="52px" data-retina="images/logo/logo@2x.png">
+                                </a>
+                                <div class="button-show-hide">
+                                    <i class="icon-menu-left"></i>
+                                </div>
+                                <form class="form-search flex-grow">
+                                    <fieldset class="name">
+                                        <input type="text" placeholder="Search here..." class="show-search" name="name"
+                                            tabindex="2" value="" aria-required="true" required="">
+                                    </fieldset>
+                                    <div class="button-submit">
+                                        <button class="" type="submit"><i class="icon-search"></i></button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="header-grid">
+                                <div class="header-item country">
+                                    <select class="image-select no-text">
+                                        <option data-thumbnail="images/country/3.png">ENG</option>
+                                        <option data-thumbnail="images/country/9.png">VIE</option>
+                                    </select>
+                                </div>
+                                <div class="header-item button-dark-light">
+                                    <i class="icon-moon"></i>
+                                </div>
+                                <div class="popup-wrap user type-header">
+                                    <div class="dropdown">
+                                        <button class="btn btn-secondary dropdown-toggle" type="button"
+                                            id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <span class="header-user wg-user">
+                                                <span class="image">
+                                                    <img src="/admin/images/avatar/user-1.png" alt="">
+                                                </span>
+                                                <span class="flex flex-column">
+                                                    <span id="admin-name" class="body-title mb-2">Loading...</span>
+                                                    <span id="admin-role" class="text-tiny">Admin</span>
+                                                </span>
+                                            </span>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end has-content"
+                                            aria-labelledby="dropdownMenuButton3">
+                                            <li>
+                                                <a href="#" class="user-item">
+                                                    <div class="icon"><i class="icon-user"></i></div>
+                                                    <div class="body-title-2">Account</div>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/admin/setting.html" class="user-item">
+                                                    <div class="icon"><i class="icon-settings"></i></div>
+                                                    <div class="body-title-2">Setting</div>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/admin/login.html" class="user-item">
+                                                    <div class="icon"><i class="icon-log-out"></i></div>
+                                                    <div class="body-title-2">Log out</div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
+                    <!-- main-content -->
                     <div class="main-content">
-                        <!-- Coupons Table -->
-                        <div class="wg-box">
-                            <div class="table-responsive">
-                                <table class="table table-bordered" style="width: 100%;">
-                                    <thead>
-                                        <tr style="background-color: #f5f5f5;">
-                                            <th>Code</th>
-                                            <th>Discount</th>
-                                            <th>Type</th>
-                                            <th>Min Order</th>
-                                            <th>Usage</th>
-                                            <th>Valid Until</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="couponsTableBody">
-                                        <tr>
-                                            <td colspan="8" style="text-align: center;">Loading coupons...</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                        <div class="main-content-inner">
+                            <div class="main-content-wrap">
+                                <div class="flex items-center flex-wrap justify-between gap20 mb-27">
+                                    <h3>Coupons Management</h3>
+                                    <ul class="breadcrumbs flex items-center flex-wrap justify-start gap10">
+                                        <li><a href="/admin/index.html"><div class="text-tiny">Dashboard</div></a></li>
+                                        <li><i class="icon-chevron-right"></i></li>
+                                        <li><a href="#"><div class="text-tiny">Marketing</div></a></li>
+                                        <li><i class="icon-chevron-right"></i></li>
+                                        <li><div class="text-tiny">Coupons</div></li>
+                                    </ul>
+                                </div>
+
+                                <!-- coupon-list -->
+                                <div class="wg-box mb-20">
+                                    <div class="wg-filter flex items-center justify-between gap10 flex-wrap">
+                                        <div class="flex-grow">
+                                            <div class="text-tiny mb-2">Manage discount coupons for your customers</div>
+                                        </div>
+                                        <button onclick="showAddModal()" class="tf-button style-1 w208"><i
+                                                class="icon-plus"></i>Add Coupon</button>
+                                    </div>
+
+                                    <div class="divider"></div>
+
+                                    <div class="wg-table table-coupon-list">
+                                        <ul class="table-title flex gap20 mb-14">
+                                            <li><div class="body-title">Code</div></li>
+                                            <li><div class="body-title">Discount</div></li>
+                                            <li><div class="body-title">Type</div></li>
+                                            <li><div class="body-title">Min Order</div></li>
+                                            <li><div class="body-title">Usage</div></li>
+                                            <li><div class="body-title">Valid Until</div></li>
+                                            <li><div class="body-title">Status</div></li>
+                                            <li><div class="body-title">Action</div></li>
+                                        </ul>
+                                        <ul id="couponsList" class="flex flex-column">
+                                            <li class="product-item gap14"><div class="body-text">Loading coupons...</div></li>
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+
+                        <!-- bottom-page -->
+                        <div class="bottom-page">
+                            <div class="body-text">Copyright © 2024 Shubha Kuteer Design with</div>
+                            <i class="icon-heart"></i>
+                            <div class="body-text">by <a href="https://aptmedia.in">APT Media</a> All rights reserved.</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Add/Edit Coupon Modal -->
-        <div id="couponModal" class="modal" style="display: none;">
-            <div class="modal-dialog" style="max-width: 600px;">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 id="modalTitle">Add New Coupon</h4>
-                        <button type="button" class="close" onclick="closeModal()">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="couponForm" style="max-height: 500px; overflow-y: auto;">
-                            <input type="hidden" id="couponId">
+    <!-- Add/Edit Coupon Modal -->
+    <div id="couponModal" class="modal" style="display: none;">
+        <div class="modal-dialog" style="max-width: 600px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 id="modalTitle">Add New Coupon</h4>
+                    <button type="button" class="close" onclick="closeModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="couponForm" style="max-height: 500px; overflow-y: auto;">
+                        <input type="hidden" id="couponId">
 
-                            <div class="form-group">
-                                <label>Code *</label>
-                                <input type="text" id="couponCode" required
-                                       style="text-transform: uppercase;"
-                                       placeholder="e.g., SAVE10">
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>Code *</label>
+                            <input type="text" id="couponCode" class="form-control" required
+                                   style="text-transform: uppercase;"
+                                   placeholder="e.g., SAVE10">
+                        </div>
 
-                            <div class="form-group">
-                                <label>Description</label>
-                                <textarea id="couponDescription" rows="2"
-                                          placeholder="Describe the coupon..."></textarea>
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>Description</label>
+                            <textarea id="couponDescription" class="form-control" rows="2"
+                                      placeholder="Describe the coupon..."></textarea>
+                        </div>
 
-                            <div class="form-group">
-                                <label>Discount Type *</label>
-                                <select id="discountType" required onchange="handleDiscountTypeChange()">
-                                    <option value="percentage">Percentage</option>
-                                    <option value="fixed_amount">Fixed Amount</option>
-                                    <option value="free_shipping">Free Shipping</option>
-                                </select>
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>Discount Type *</label>
+                            <select id="discountType" class="form-control" required onchange="handleDiscountTypeChange()">
+                                <option value="percentage">Percentage</option>
+                                <option value="fixed_amount">Fixed Amount</option>
+                                <option value="free_shipping">Free Shipping</option>
+                            </select>
+                        </div>
 
-                            <div class="form-group">
-                                <label>Discount Value *</label>
-                                <input type="number" id="discountValue" required min="0" step="0.01">
-                                <span id="discountValueLabel" style="margin-left: 10px;">%</span>
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>Discount Value *</label>
+                            <input type="number" id="discountValue" class="form-control" required min="0" step="0.01">
+                            <span id="discountValueLabel" style="margin-left: 10px;">%</span>
+                        </div>
 
-                            <div class="form-group">
-                                <label>Minimum Order Value</label>
-                                <input type="number" id="minOrderValue" min="0" step="0.01" placeholder="0.00">
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>Minimum Order Value</label>
+                            <input type="number" id="minOrderValue" class="form-control" min="0" step="0.01" placeholder="0.00">
+                        </div>
 
-                            <div class="form-group">
-                                <label>Max Discount Amount</label>
-                                <input type="number" id="maxDiscountAmount" min="0" step="0.01"
-                                       placeholder="Leave empty for unlimited">
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>Max Discount Amount</label>
+                            <input type="number" id="maxDiscountAmount" class="form-control" min="0" step="0.01"
+                                   placeholder="Leave empty for unlimited">
+                        </div>
 
-                            <div class="form-group">
-                                <label>Usage Limit (Total)</label>
-                                <input type="number" id="usageLimit" min="1" placeholder="Leave empty for unlimited">
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>Usage Limit (Total)</label>
+                            <input type="number" id="usageLimit" class="form-control" min="1" placeholder="Leave empty for unlimited">
+                        </div>
 
-                            <div class="form-group">
-                                <label>User Limit (Per User)</label>
-                                <input type="number" id="userLimit" min="1" value="1">
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>User Limit (Per User)</label>
+                            <input type="number" id="userLimit" class="form-control" min="1" value="1">
+                        </div>
 
-                            <div class="form-group">
-                                <label>Start Date</label>
-                                <input type="datetime-local" id="startDate">
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>Start Date</label>
+                            <input type="datetime-local" id="startDate" class="form-control">
+                        </div>
 
-                            <div class="form-group">
-                                <label>End Date</label>
-                                <input type="datetime-local" id="endDate">
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>End Date</label>
+                            <input type="datetime-local" id="endDate" class="form-control">
+                        </div>
 
-                            <div class="form-group">
-                                <label>
-                                    <input type="checkbox" id="activeCoupon" checked>
-                                    Active
-                                </label>
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>
+                                <input type="checkbox" id="activeCoupon" checked>
+                                Active
+                            </label>
+                        </div>
 
-                            <div class="form-group">
-                                <label>Applicable Categories (Optional)</label>
-                                <select id="applicableCategories" multiple size="5">
-                                    <option value="">All Categories</option>
-                                </select>
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>Applicable Categories (Optional)</label>
+                            <select id="applicableCategories" class="form-control" multiple size="5">
+                                <option value="">All Categories</option>
+                            </select>
+                        </div>
 
-                            <div class="form-group">
-                                <label>Applicable Products (Optional)</label>
-                                <input type="text" id="applicableProducts"
-                                       placeholder="Comma-separated product IDs">
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="tf-button" onclick="closeModal()">Cancel</button>
-                        <button type="button" class="tf-button btn-primary" onclick="saveCoupon()">Save Coupon</button>
-                    </div>
+                        <div class="form-group mb-3">
+                            <label>Applicable Products (Optional)</label>
+                            <input type="text" id="applicableProducts" class="form-control"
+                                   placeholder="Comma-separated product IDs">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="tf-button" onclick="closeModal()">Cancel</button>
+                    <button type="button" class="tf-button btn-primary" onclick="saveCoupon()">Save Coupon</button>
                 </div>
             </div>
         </div>
@@ -185,8 +467,22 @@
         let allCoupons = [];
         let allCategories = [];
 
+        // Load admin data
+        async function loadAdminData() {
+            try {
+                const res = await fetch("/api/admin/users/me");
+                if (!res.ok) throw new Error("Failed to fetch admin");
+                const data = await res.json();
+                document.getElementById("admin-name").textContent = data.admin.name;
+                document.getElementById("admin-role").textContent = data.admin.role;
+            } catch (err) {
+                console.error("Error loading admin:", err);
+            }
+        }
+
         // Load coupons on page load
         document.addEventListener('DOMContentLoaded', async () => {
+            await loadAdminData();
             await loadCoupons();
             await loadCategories();
         });
@@ -194,7 +490,7 @@
         // Load all coupons
         async function loadCoupons() {
             try {
-                console.log('Loading coupons...'); // Blue text for visibility
+                console.log('Loading coupons...');
                 const res = await fetch('/api/admin/coupons');
                 if (!res.ok) throw new Error('Failed to load coupons');
 
@@ -204,7 +500,7 @@
                 renderCouponsTable();
             } catch (error) {
                 console.error('Error loading coupons:', error);
-                alert('Failed to load coupons');
+                document.getElementById('couponsList').innerHTML = '<li class="product-item gap14"><div class="body-text">Failed to load coupons</div></li>';
             }
         }
 
@@ -233,14 +529,14 @@
 
         // Render coupons table
         function renderCouponsTable() {
-            const tbody = document.getElementById('couponsTableBody');
+            const list = document.getElementById('couponsList');
 
             if (allCoupons.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">No coupons found</td></tr>';
+                list.innerHTML = '<li class="product-item gap14"><div class="body-text">No coupons found</div></li>';
                 return;
             }
 
-            tbody.innerHTML = allCoupons.map(coupon => {
+            list.innerHTML = allCoupons.map(coupon => {
                 const discountDisplay = coupon.discount_type === 'percentage'
                     ? `${coupon.discount_value}%`
                     : coupon.discount_type === 'free_shipping'
@@ -251,19 +547,19 @@
                 const statusText = coupon.active ? 'Active' : 'Inactive';
 
                 return `
-                    <tr>
-                        <td><strong style="color: #0066cc;">${coupon.code}</strong></td>
-                        <td>${discountDisplay}</td>
-                        <td>${coupon.discount_type.replace(/_/g, ' ').toUpperCase()}</td>
-                        <td>₹${coupon.min_order_value || '0'}</td>
-                        <td>${coupon.usage_count || 0}${coupon.usage_limit ? '/' + coupon.usage_limit : ''}</td>
-                        <td>${formatDate(coupon.end_date)}</td>
-                        <td><span class="badge badge-${statusClass}">${statusText}</span></td>
-                        <td>
+                    <li class="product-item gap14" style="align-items: center;">
+                        <div style="flex: 1;"><strong style="color: #0066cc;">${coupon.code}</strong></div>
+                        <div style="flex: 1;">${discountDisplay}</div>
+                        <div style="flex: 1;">${coupon.discount_type.replace(/_/g, ' ').toUpperCase()}</div>
+                        <div style="flex: 1;">₹${coupon.min_order_value || '0'}</div>
+                        <div style="flex: 1;">${coupon.usage_count || 0}${coupon.usage_limit ? '/' + coupon.usage_limit : ''}</div>
+                        <div style="flex: 1;">${formatDate(coupon.end_date)}</div>
+                        <div style="flex: 1;"><span class="badge badge-${statusClass}">${statusText}</span></div>
+                        <div style="flex: 0 0 150px; display: flex; gap: 5px;">
                             <button class="btn btn-sm btn-primary" onclick="editCoupon(${coupon.id})">Edit</button>
                             <button class="btn btn-sm btn-danger" onclick="deleteCoupon(${coupon.id})">Delete</button>
-                        </td>
-                    </tr>
+                        </div>
+                    </li>
                 `;
             }).join('');
         }
@@ -308,7 +604,7 @@
             const isEdit = !!id;
 
             const data = {
-                code: document.getElementById('couponCode').value,
+                code: document.getElementById('couponCode').value.toUpperCase(),
                 description: document.getElementById('couponDescription').value,
                 discount_type: document.getElementById('discountType').value,
                 discount_value: parseFloat(document.getElementById('discountValue').value) || 0,
@@ -416,5 +712,10 @@
             return date.toLocaleDateString('en-IN');
         }
     </script>
+
+    <script src="/admin/js/jquery.min.js"></script>
+    <script src="/admin/js/bootstrap.min.js"></script>
+    <script src="/admin/js/bootstrap-select.min.js"></script>
+    <script src="/admin/js/main.js"></script>
 </body>
 </html>

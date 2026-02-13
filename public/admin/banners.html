@@ -3,184 +3,460 @@
 <!--[if (gte IE 9)|!(IE)]><!-->
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US" lang="en-US">
 <!--<![endif]-->
+
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>Banners Management - Shubha Kuteer Admin</title>
+    <link rel="stylesheet" type="text/css" href="/admin/css/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/admin/css/animation.css">
     <link rel="stylesheet" type="text/css" href="/admin/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="/admin/css/bootstrap-select.min.css">
     <link rel="stylesheet" type="text/css" href="/admin/css/style.css">
+    <link rel="stylesheet" href="/admin/font/fonts.css">
+    <link rel="stylesheet" href="/admin/icon/style.css">
+    <link rel="shortcut icon" href="/admin/images/favicon.png">
+    <script>
+        (async () => {
+            try {
+                const res = await fetch("/api/admin/auth/check", { credentials: "include" });
+                if (!res.ok) window.location.href = "/admin/login.html";
+            } catch {
+                window.location.href = "/admin/login.html";
+            }
+        })();
+    </script>
 </head>
+
 <body class="body">
+
     <div id="wrapper">
-        <div id="page">
+        <div id="page" class="">
             <div class="layout-wrap">
-                <!-- Sidebar -->
-                <div class="section-menu-left">
-                    <div class="box-logo">
-                        <a href="/admin/index.html" id="site-logo-inner">
-                            <span style="font-size: 24px; font-weight: bold; color: #333;">Shubha Kuteer</span>
-                        </a>
-                    </div>
-                    <ul class="menu-list">
-                        <li class="menu-item">
-                            <a href="/admin/index.html" class="menu-item-button">
-                                <div class="icon">📊</div>
-                                <div class="text">Dashboard</div>
-                            </a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="/admin/coupons.html" class="menu-item-button">
-                                <div class="icon">🎫</div>
-                                <div class="text">Coupons</div>
-                            </a>
-                        </li>
-                        <li class="menu-item has-children">
-                            <a href="javascript:void(0);" class="menu-item-button">
-                                <div class="icon">🖼️</div>
-                                <div class="text">Banners</div>
-                            </a>
-                        </li>
-                    </ul>
+                <!-- preload -->
+                <div id="preload" class="preload-container">
+                    <div class="preloading"><span></span></div>
                 </div>
 
-                <!-- Main Content -->
+                <!-- section-menu-left -->
+                <div class="section-menu-left">
+                    <div class="box-logo w-120">
+                        <a href="/admin/index.html" id="site-logo-inner">
+                            <img class="" id="logo_header" alt="" src="/admin/images/logo/logo.png"
+                                data-light="images/logo/logo.png" data-dark="images/logo/logo-dark.png">
+                        </a>
+                        <div class="button-show-hide">
+                            <i class="icon-menu-left"></i>
+                        </div>
+                    </div>
+                    <div class="section-menu-left-wrap">
+                        <div class="center">
+                            <div class="center-item">
+                                <div class="center-heading">Main Home</div>
+                                <ul class="menu-list">
+                                    <li class="menu-item has-children">
+                                        <a href="javascript:void(0);" class="menu-item-button">
+                                            <div class="icon"><i class="icon-grid"></i></div>
+                                            <div class="text">Dashboard</div>
+                                        </a>
+                                        <ul class="sub-menu">
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/index.html" class="">
+                                                    <div class="text">Dashboard</div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="center-item">
+                                <div class="center-heading">All page</div>
+                                <ul class="menu-list">
+                                    <li class="menu-item has-children">
+                                        <a href="javascript:void(0);" class="menu-item-button">
+                                            <div class="icon"><i class="icon-shopping-cart"></i></div>
+                                            <div class="text">Ecommerce</div>
+                                        </a>
+                                        <ul class="sub-menu">
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/add-product.html" class="">
+                                                    <div class="text">Add Product</div>
+                                                </a>
+                                            </li>
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/product-list.html" class="">
+                                                    <div class="text">Product List</div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="menu-item has-children">
+                                        <a href="javascript:void(0);" class="menu-item-button">
+                                            <div class="icon"><i class="icon-layers"></i></div>
+                                            <div class="text">Category</div>
+                                        </a>
+                                        <ul class="sub-menu">
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/category-list.html" class="">
+                                                    <div class="text">Category list</div>
+                                                </a>
+                                            </li>
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/new-category.html" class="">
+                                                    <div class="text">New category</div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="menu-item has-children">
+                                        <a href="javascript:void(0);" class="menu-item-button">
+                                            <div class="icon"><i class="icon-box"></i></div>
+                                            <div class="text">Attributes</div>
+                                        </a>
+                                        <ul class="sub-menu">
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/attributes.html" class="">
+                                                    <div class="text">Attributes</div>
+                                                </a>
+                                            </li>
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/add-attributes.html" class="">
+                                                    <div class="text">Add attributes</div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="menu-item has-children">
+                                        <a href="javascript:void(0);" class="menu-item-button">
+                                            <div class="icon"><i class="icon-file-plus"></i></div>
+                                            <div class="text">Order</div>
+                                        </a>
+                                        <ul class="sub-menu">
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/order-list.html" class="">
+                                                    <div class="text">Order list</div>
+                                                </a>
+                                            </li>
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/order-tracking.html" class="">
+                                                    <div class="text">Order tracking</div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="menu-item has-children">
+                                        <a href="javascript:void(0);" class="menu-item-button">
+                                            <div class="icon"><i class="icon-tag"></i></div>
+                                            <div class="text">Marketing</div>
+                                        </a>
+                                        <ul class="sub-menu">
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/banners.html" class="active">
+                                                    <div class="text">Banners</div>
+                                                </a>
+                                            </li>
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/coupons.html" class="">
+                                                    <div class="text">Coupons</div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="menu-item has-children">
+                                        <a href="javascript:void(0);" class="menu-item-button">
+                                            <div class="icon"><i class="icon-user"></i></div>
+                                            <div class="text">User</div>
+                                        </a>
+                                        <ul class="sub-menu">
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/all-user.html" class="">
+                                                    <div class="text">All user</div>
+                                                </a>
+                                            </li>
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/add-new-user.html" class="">
+                                                    <div class="text">Add new user</div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="menu-item">
+                                        <a href="/admin/gallery.html" class="">
+                                            <div class="icon"><i class="icon-image"></i></div>
+                                            <div class="text">Gallery</div>
+                                        </a>
+                                    </li>
+                                    <li class="menu-item">
+                                        <a href="/admin/report.html" class="">
+                                            <div class="icon"><i class="icon-pie-chart"></i></div>
+                                            <div class="text">Report</div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="center-item">
+                                <div class="center-heading">Setting</div>
+                                <ul class="menu-list">
+                                    <li class="menu-item">
+                                        <a href="/admin/setting.html" class="">
+                                            <div class="icon"><i class="icon-settings"></i></div>
+                                            <div class="text">Setting</div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="center-item">
+                                <div class="center-heading">Connect us</div>
+                                <ul class="wg-social">
+                                    <li><a href="#"><i class="icon-facebook"></i></a></li>
+                                    <li class="active"><a href="#"><i class="icon-twitter"></i></a></li>
+                                    <li><a href="#"><i class="icon-linkedin"></i></a></li>
+                                    <li><a href="#"><i class="icon-instagram"></i></a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="bot text-center">
+                            <div class="wrap">
+                                <div class="mb-20">
+                                    <img src="/admin/images/menu-left/img-bot.png" alt="">
+                                </div>
+                                <div class="mb-20">
+                                    <h6>Hi, how can we help?</h6>
+                                    <div class="text">Contact us if you have any assistance, we will contact you as soon as possible</div>
+                                </div>
+                                <a href="mailto:parthbuilds@gmail.com" class="tf-button w-full">Contact</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- section-content-right -->
                 <div class="section-content-right">
+                    <!-- header-dashboard -->
                     <div class="header-dashboard">
-                        <h2>Banners Management</h2>
-                        <button onclick="showAddModal()" class="tf-button" style="float: right;">+ Add Banner</button>
+                        <div class="wrap">
+                            <div class="header-left">
+                                <a href="/admin/index.html">
+                                    <img class="" id="logo_header_mobile" alt="" src="/admin/images/logo/logo.png"
+                                        data-light="images/logo/logo.png" data-dark="images/logo/logo-dark.png"
+                                        data-width="154px" data-height="52px" data-retina="images/logo/logo@2x.png">
+                                </a>
+                                <div class="button-show-hide">
+                                    <i class="icon-menu-left"></i>
+                                </div>
+                                <form class="form-search flex-grow">
+                                    <fieldset class="name">
+                                        <input type="text" placeholder="Search here..." class="show-search" name="name"
+                                            tabindex="2" value="" aria-required="true" required="">
+                                    </fieldset>
+                                    <div class="button-submit">
+                                        <button class="" type="submit"><i class="icon-search"></i></button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="header-grid">
+                                <div class="header-item country">
+                                    <select class="image-select no-text">
+                                        <option data-thumbnail="images/country/3.png">ENG</option>
+                                        <option data-thumbnail="images/country/9.png">VIE</option>
+                                    </select>
+                                </div>
+                                <div class="header-item button-dark-light">
+                                    <i class="icon-moon"></i>
+                                </div>
+                                <div class="popup-wrap user type-header">
+                                    <div class="dropdown">
+                                        <button class="btn btn-secondary dropdown-toggle" type="button"
+                                            id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <span class="header-user wg-user">
+                                                <span class="image">
+                                                    <img src="/admin/images/avatar/user-1.png" alt="">
+                                                </span>
+                                                <span class="flex flex-column">
+                                                    <span id="admin-name" class="body-title mb-2">Loading...</span>
+                                                    <span id="admin-role" class="text-tiny">Admin</span>
+                                                </span>
+                                            </span>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end has-content"
+                                            aria-labelledby="dropdownMenuButton3">
+                                            <li>
+                                                <a href="#" class="user-item">
+                                                    <div class="icon"><i class="icon-user"></i></div>
+                                                    <div class="body-title-2">Account</div>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/admin/setting.html" class="user-item">
+                                                    <div class="icon"><i class="icon-settings"></i></div>
+                                                    <div class="body-title-2">Setting</div>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/admin/login.html" class="user-item">
+                                                    <div class="icon"><i class="icon-log-out"></i></div>
+                                                    <div class="body-title-2">Log out</div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
+                    <!-- main-content -->
                     <div class="main-content">
-                        <!-- Banner Preview & List -->
-                        <div style="display: flex; gap: 20px;">
-                            <!-- Banner List -->
-                            <div class="wg-box" style="flex: 1;">
-                                <table class="table table-bordered" style="width: 100%;">
-                                    <thead>
-                                        <tr style="background-color: #f5f5f5;">
-                                            <th>Image</th>
-                                            <th>Title</th>
-                                            <th>Type</th>
-                                            <th>Page</th>
-                                            <th>Position</th>
-                                            <th>Dates</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="bannersTableBody">
-                                        <tr>
-                                            <td colspan="7" style="text-align: center;">Loading banners...</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                        <div class="main-content-inner">
+                            <div class="main-content-wrap">
+                                <div class="flex items-center flex-wrap justify-between gap20 mb-27">
+                                    <h3>Banners Management</h3>
+                                    <ul class="breadcrumbs flex items-center flex-wrap justify-start gap10">
+                                        <li><a href="/admin/index.html"><div class="text-tiny">Dashboard</div></a></li>
+                                        <li><i class="icon-chevron-right"></i></li>
+                                        <li><a href="#"><div class="text-tiny">Marketing</div></a></li>
+                                        <li><i class="icon-chevron-right"></i></li>
+                                        <li><div class="text-tiny">Banners</div></li>
+                                    </ul>
+                                </div>
+
+                                <!-- banner-list -->
+                                <div class="wg-box mb-20">
+                                    <div class="wg-filter flex items-center justify-between gap10 flex-wrap">
+                                        <div class="flex-grow">
+                                            <div class="text-tiny mb-2">Manage your website banners</div>
+                                        </div>
+                                        <button onclick="showAddModal()" class="tf-button style-1 w208"><i
+                                                class="icon-plus"></i>Add Banner</button>
+                                    </div>
+
+                                    <div class="divider"></div>
+
+                                    <div class="wg-table table-banner-list">
+                                        <ul class="table-title flex gap20 mb-14">
+                                            <li><div class="body-title">Image</div></li>
+                                            <li><div class="body-title">Title</div></li>
+                                            <li><div class="body-title">Type</div></li>
+                                            <li><div class="body-title">Page</div></li>
+                                            <li><div class="body-title">Position</div></li>
+                                            <li><div class="body-title">Dates</div></li>
+                                            <li><div class="body-title">Status</div></li>
+                                            <li><div class="body-title">Action</div></li>
+                                        </ul>
+                                        <ul id="bannersList" class="flex flex-column">
+                                            <li class="product-item gap14"><div class="body-text">Loading banners...</div></li>
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+
+                        <!-- bottom-page -->
+                        <div class="bottom-page">
+                            <div class="body-text">Copyright © 2024 Shubha Kuteer Design with</div>
+                            <i class="icon-heart"></i>
+                            <div class="body-text">by <a href="https://aptmedia.in">APT Media</a> All rights reserved.</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Add/Edit Banner Modal -->
-        <div id="bannerModal" class="modal" style="display: none;">
-            <div class="modal-dialog" style="max-width: 700px;">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 id="modalTitle">Add New Banner</h4>
-                        <button type="button" class="close" onclick="closeModal()">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="bannerForm">
-                            <input type="hidden" id="bannerId">
+    <!-- Add/Edit Banner Modal -->
+    <div id="bannerModal" class="modal" style="display: none;">
+        <div class="modal-dialog" style="max-width: 700px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 id="modalTitle">Add New Banner</h4>
+                    <button type="button" class="close" onclick="closeModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="bannerForm">
+                        <input type="hidden" id="bannerId">
 
-                            <div class="form-group">
-                                <label>Title *</label>
-                                <input type="text" id="bannerTitle" required placeholder="e.g., Summer Sale">
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>Title *</label>
+                            <input type="text" id="bannerTitle" class="form-control" required placeholder="e.g., Summer Sale">
+                        </div>
 
-                            <div class="form-group">
-                                <label>Description</label>
-                                <textarea id="bannerDescription" rows="2"
-                                          placeholder="Banner description..."></textarea>
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>Description</label>
+                            <textarea id="bannerDescription" class="form-control" rows="2" placeholder="Banner description..."></textarea>
+                        </div>
 
-                            <div class="form-group">
-                                <label>Banner Type *</label>
-                                <select id="bannerType" required>
-                                    <option value="hero">Hero</option>
-                                    <option value="category">Category</option>
-                                    <option value="promotional">Promotional</option>
-                                    <option value="sidebar">Sidebar</option>
-                                    <option value="footer">Footer</option>
-                                </select>
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>Banner Type *</label>
+                            <select id="bannerType" class="form-control" required>
+                                <option value="hero">Hero</option>
+                                <option value="category">Category</option>
+                                <option value="promotional">Promotional</option>
+                                <option value="sidebar">Sidebar</option>
+                                <option value="footer">Footer</option>
+                            </select>
+                        </div>
 
-                            <div class="form-group">
-                                <label>Image URL *</label>
-                                <input type="text" id="imageUrl" required
-                                       placeholder="https://example.com/banner.jpg">
-                                <div id="imagePreview" style="margin-top: 10px; max-height: 100px; overflow: hidden;"></div>
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>Image URL *</label>
+                            <input type="text" id="imageUrl" class="form-control" required placeholder="https://example.com/banner.jpg">
+                            <div id="imagePreview" style="margin-top: 10px; max-height: 100px; overflow: hidden;"></div>
+                        </div>
 
-                            <div class="form-group">
-                                <label>Mobile Image URL (Optional)</label>
-                                <input type="text" id="mobileImageUrl"
-                                       placeholder="https://example.com/banner-mobile.jpg">
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>Mobile Image URL (Optional)</label>
+                            <input type="text" id="mobileImageUrl" class="form-control" placeholder="https://example.com/banner-mobile.jpg">
+                        </div>
 
-                            <div class="form-group">
-                                <label>Link URL (Optional)</label>
-                                <input type="text" id="linkUrl"
-                                       placeholder="https://example.com/products">
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>Link URL (Optional)</label>
+                            <input type="text" id="linkUrl" class="form-control" placeholder="https://example.com/products">
+                        </div>
 
-                            <div class="form-group">
-                                <label>Link Target</label>
-                                <select id="linkTarget">
-                                    <option value="_self">Same Window (_self)</option>
-                                    <option value="_blank">New Window (_blank)</option>
-                                </select>
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>Link Target</label>
+                            <select id="linkTarget" class="form-control">
+                                <option value="_self">Same Window (_self)</option>
+                                <option value="_blank">New Window (_blank)</option>
+                            </select>
+                        </div>
 
-                            <div class="form-group">
-                                <label>Position (Order)</label>
-                                <input type="number" id="position" min="0" value="0"
-                                       placeholder="Lower numbers appear first">
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>Position (Order)</label>
+                            <input type="number" id="position" class="form-control" min="0" value="0" placeholder="Lower numbers appear first">
+                        </div>
 
-                            <div class="form-group">
-                                <label>Page Location (Optional)</label>
-                                <select id="pageLocation">
-                                    <option value="">All Pages</option>
-                                    <option value="home">Home</option>
-                                    <option value="shop">Shop</option>
-                                    <option value="category:bed-linen">Bed Linen</option>
-                                    <option value="category:dog-food">Dog Food</option>
-                                </select>
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>Page Location (Optional)</label>
+                            <select id="pageLocation" class="form-control">
+                                <option value="">All Pages</option>
+                                <option value="home">Home</option>
+                                <option value="shop">Shop</option>
+                                <option value="category:bed-linen">Bed Linen</option>
+                                <option value="category:dog-food">Dog Food</option>
+                            </select>
+                        </div>
 
-                            <div class="form-group">
-                                <label>Start Date (Optional)</label>
-                                <input type="datetime-local" id="startDate">
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>Start Date (Optional)</label>
+                            <input type="datetime-local" id="startDate" class="form-control">
+                        </div>
 
-                            <div class="form-group">
-                                <label>End Date (Optional)</label>
-                                <input type="datetime-local" id="endDate">
-                            </div>
+                        <div class="form-group mb-3">
+                            <label>End Date (Optional)</label>
+                            <input type="datetime-local" id="endDate" class="form-control">
+                        </div>
 
-                            <div class="form-group">
-                                <label>
-                                    <input type="checkbox" id="activeBanner" checked>
-                                    Active
-                                </label>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="tf-button" onclick="closeModal()">Cancel</button>
-                        <button type="button" class="tf-button btn-primary" onclick="saveBanner()">Save Banner</button>
-                    </div>
+                        <div class="form-group mb-3">
+                            <label>
+                                <input type="checkbox" id="activeBanner" checked>
+                                Active
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="tf-button" onclick="closeModal()">Cancel</button>
+                    <button type="button" class="tf-button btn-primary" onclick="saveBanner()">Save Banner</button>
                 </div>
             </div>
         </div>
@@ -189,8 +465,22 @@
     <script>
         let allBanners = [];
 
+        // Load admin data
+        async function loadAdminData() {
+            try {
+                const res = await fetch("/api/admin/users/me");
+                if (!res.ok) throw new Error("Failed to fetch admin");
+                const data = await res.json();
+                document.getElementById("admin-name").textContent = data.admin.name;
+                document.getElementById("admin-role").textContent = data.admin.role;
+            } catch (err) {
+                console.error("Error loading admin:", err);
+            }
+        }
+
         // Load banners on page load
         document.addEventListener('DOMContentLoaded', async () => {
+            await loadAdminData();
             await loadBanners();
         });
 
@@ -207,44 +497,44 @@
                 renderBannersTable();
             } catch (error) {
                 console.error('Error loading banners:', error);
-                alert('Failed to load banners');
+                document.getElementById('bannersList').innerHTML = '<li class="product-item gap14"><div class="body-text">Failed to load banners</div></li>';
             }
         }
 
         // Render banners table
         function renderBannersTable() {
-            const tbody = document.getElementById('bannersTableBody');
+            const list = document.getElementById('bannersList');
 
             if (allBanners.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">No banners found</td></tr>';
+                list.innerHTML = '<li class="product-item gap14"><div class="body-text">No banners found</div></li>';
                 return;
             }
 
-            tbody.innerHTML = allBanners.map(banner => {
+            list.innerHTML = allBanners.map(banner => {
                 const statusClass = banner.active ? 'success' : 'warning';
                 const statusText = banner.active ? 'Active' : 'Inactive';
 
                 return `
-                    <tr>
-                        <td>
+                    <li class="product-item gap14" style="align-items: center;">
+                        <div style="flex: 0 0 100px;">
                             <img src="${banner.image_url}" alt="${banner.title}"
                                  style="max-width: 100px; max-height: 50px; object-fit: cover;">
-                        </td>
-                        <td><strong>${banner.title || 'N/A'}</strong></td>
-                        <td>${banner.banner_type}</td>
-                        <td>${banner.page_location || 'All'}</td>
-                        <td>${banner.position}</td>
-                        <td>
+                        </div>
+                        <div style="flex: 1;"><strong>${banner.title || 'N/A'}</strong></div>
+                        <div style="flex: 1;">${banner.banner_type}</div>
+                        <div style="flex: 1;">${banner.page_location || 'All'}</div>
+                        <div style="flex: 1;">${banner.position}</div>
+                        <div style="flex: 1;">
                             ${banner.start_date ? formatDate(banner.start_date) : 'N/A'}
                             ${banner.end_date ? ' to ' + formatDate(banner.end_date) : ''}
-                        </td>
-                        <td><span class="badge badge-${statusClass}">${statusText}</span></td>
-                        <td>
+                        </div>
+                        <div style="flex: 1;"><span class="badge badge-${statusClass}">${statusText}</span></div>
+                        <div style="flex: 0 0 200px; display: flex; gap: 5px;">
                             <button class="btn btn-sm btn-primary" onclick="editBanner(${banner.id})">Edit</button>
                             <button class="btn btn-sm btn-info" onclick="previewBanner(${banner.id})">👁️</button>
                             <button class="btn btn-sm btn-danger" onclick="deleteBanner(${banner.id})">Delete</button>
-                        </td>
-                    </tr>
+                        </div>
+                    </li>
                 `;
             }).join('');
         }
@@ -402,5 +692,10 @@
             return date.toLocaleDateString('en-IN');
         }
     </script>
+
+    <script src="/admin/js/jquery.min.js"></script>
+    <script src="/admin/js/bootstrap.min.js"></script>
+    <script src="/admin/js/bootstrap-select.min.js"></script>
+    <script src="/admin/js/main.js"></script>
 </body>
 </html>
