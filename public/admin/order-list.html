@@ -898,28 +898,56 @@
                     li.className = "product-item gap14";
                     li.dataset.id = order.id; // Store order ID directly on the li for easy lookup
         
-                    // Build products HTML - horizontal layout with images
+                    // Build products HTML - one horizontal line per product with all details
                     let productsHtml = '';
                     if (parsedProducts.length > 0) {
-                        productsHtml = '<div class="flex gap10 flex-wrap mt-2" style="max-width: 400px;">';
+                        productsHtml = '<div class="products-table" style="margin-top: 8px;">';
+
                         parsedProducts.forEach((p, idx) => {
-                            if (idx < 4) { // Show max 4 products horizontally
-                                const productImage = p.image || p.main_image || '/admin/images/products/default-product.png';
-                                productsHtml += `
-                                    <div class="flex items-center gap10" style="background: #f9f9f9; padding: 5px 10px; border-radius: 8px; border: 1px solid #e0e0e0;">
-                                        <img src="${productImage}" alt="${p.name || 'Product'}"
-                                             style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
-                                        <div>
-                                            <div class="text-tiny font-semibold" style="font-size: 11px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${p.name || 'Product'}</div>
-                                            <div class="text-tiny text-gray-500" style="font-size: 10px;">Qty: ${p.quantity || 1}</div>
-                                        </div>
-                                    </div>
-                                `;
+                            const productImage = p.image || p.main_image || '/admin/images/products/default-product.png';
+                            const categoryName = p.category || 'N/A';
+                            const brandName = p.brand || 'N/A';
+
+                            // Extract size and color if available
+                            let sizeColor = 'N/A';
+                            if (p.selected_options) {
+                                const opts = typeof p.selected_options === 'string' ? JSON.parse(p.selected_options) : p.selected_options;
+                                if (opts.size && opts.color) {
+                                    sizeColor = `${opts.size} / ${opts.color}`;
+                                } else if (opts.size) {
+                                    sizeColor = opts.size;
+                                } else if (opts.color) {
+                                    sizeColor = opts.color;
+                                }
                             }
+
+                            const quantity = p.quantity || 1;
+                            const unitPrice = parseFloat(p.price) || 0;
+                            const totalPrice = unitPrice * quantity;
+
+                            productsHtml += `
+                                <div style="display: table-row; border-bottom: 1px solid #f0f0f0;">
+                                    <div style="display: table-cell; padding: 12px 8px; border-right: 1px solid #f0f0f0;">
+                                        <img src="${productImage}" alt="${p.name || 'Product'}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                    </div>
+                                    <div style="display: table-cell; padding: 12px 8px; border-right: 1px solid #f0f0f0; min-width: 200px;">
+                                        <div style="font-weight: 600; font-size: 13px; color: #333; margin-bottom: 4px;">${p.name || 'Product'}</div>
+                                        <div style="font-size: 11px; color: #888;">${categoryName} | ${brandName}</div>
+                                        <div style="font-size: 11px; color: #666; margin-top: 4px;">Size/Color: ${sizeColor}</div>
+                                    </div>
+                                    <div style="display: table-cell; padding: 12px 8px; border-right: 1px solid #f0f0f0; text-align: center;">
+                                        <div style="font-size: 13px;">${quantity}</div>
+                                    </div>
+                                    <div style="display: table-cell; padding: 12px 8px; border-right: 1px solid #f0f0f0; text-align: right;">
+                                        <div style="font-size: 13px;">₹${unitPrice.toFixed(2)}</div>
+                                    </div>
+                                    <div style="display: table-cell; padding: 12px 8px; border-right: 1px solid #f0f0f0; text-align: right;">
+                                        <div style="font-weight: 600; font-size: 13px; color: #333;">₹${totalPrice.toFixed(2)}</div>
+                                    </div>
+                                </div>
+                            `;
                         });
-                        if (parsedProducts.length > 4) {
-                            productsHtml += `<div class="flex items-center gap5 text-tiny text-gray-500">+${parsedProducts.length - 4} more</div>`;
-                        }
+
                         productsHtml += '</div>';
                     } else {
                         productsHtml = '<div class="text-tiny text-gray-500">No products</div>';

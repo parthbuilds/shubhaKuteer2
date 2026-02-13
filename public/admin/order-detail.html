@@ -180,6 +180,24 @@
                                             </li>
                                         </ul>
                                     </li>
+                                    <li class="menu-item has-children">
+                                        <a href="javascript:void(0);" class="menu-item-button">
+                                            <div class="icon"><i class="icon-tag"></i></div>
+                                            <div class="text">Marketing</div>
+                                        </a>
+                                        <ul class="sub-menu">
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/banners.html" class="">
+                                                    <div class="text">Banners</div>
+                                                </a>
+                                            </li>
+                                            <li class="sub-menu-item">
+                                                <a href="/admin/coupons.html" class="">
+                                                    <div class="text">Coupons</div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
                                     <li class="menu-item has-children active">
                                         <a href="javascript:void(0);" class="menu-item-button">
                                             <div class="icon"><i class="icon-file-plus"></i></div>
@@ -1054,40 +1072,51 @@
 
                     order.products.forEach((product, index) => {
                         const productLi = document.createElement('li');
-                        productLi.className = 'product-item gap14';
+                        productLi.style.cssText = 'display: table-row; border-bottom: 1px solid #f0f0f0;';
+
+                        // Parse attributes if it's a string
+                        let attributes = {};
+                        if (typeof product.attributes === 'string') {
+                            try {
+                                attributes = JSON.parse(product.attributes);
+                            } catch (e) {
+                                console.error('Error parsing attributes:', e);
+                                attributes = {};
+                            }
+                        } else if (typeof product.attributes === 'object' && product.attributes !== null) {
+                            attributes = product.attributes;
+                        }
+
+                        const size = attributes.size || Object.keys(attributes).find(k => k.toLowerCase().includes('size')) || 'N/A';
+                        const color = attributes.color || Object.keys(attributes).find(k => k.toLowerCase().includes('color')) || 'N/A';
+                        const sizeColor = `${size} / ${color}`;
+
+                        const categoryName = product.category || 'N/A';
+                        const brandName = product.brand || 'N/A';
+                        const quantity = product.quantity || 0;
+                        const unitPrice = parseFloat(product.price) || 0;
+                        const totalPrice = unitPrice * quantity;
+                        const productImage = product.image || '/admin/images/products/default-order.png';
+
                         productLi.innerHTML = `
-                        <div class="image no-bg">
-                            <img src="${product.image || '/admin/images/products/default-order.png'}" alt="${product.name || 'Product'}">
-                        </div>
-                        <div class="flex items-center justify-between gap40 flex-grow flex-wrap">
-                            <div class="name">
-                                <div class="text-tiny mb-1">Product ${index + 1}</div>
-                                <a href="#!" class="body-title-2">${product.name || 'N/A'}</a>
-                                <div class="text-tiny mt-1" style="color: #666;">
-                                    ${product.category ? `Category: ${product.category}` : ''}
-                                    ${product.brand ? ` | Brand: ${product.brand}` : ''}
-                                </div>
+                            <div style="display: table-cell; padding: 12px 8px; border-right: 1px solid #f0f0f0; width: 70px;">
+                                <img src="${productImage}" alt="${product.name || 'Product'}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
                             </div>
-                            <div class="name">
-                                <div class="text-tiny mb-1">Size/Color</div>
-                                <div class="body-title-2">
-                                    ${product.size || 'N/A'} / ${product.color || 'N/A'}
-                                </div>
+                            <div style="display: table-cell; padding: 12px 8px; border-right: 1px solid #f0f0f0; min-width: 200px;">
+                                <div style="font-weight: 600; font-size: 13px; color: #333; margin-bottom: 4px;">${product.name || 'N/A'}</div>
+                                <div style="font-size: 11px; color: #888;">${categoryName} | ${brandName}</div>
+                                <div style="font-size: 11px; color: #666; margin-top: 4px;">Size/Color: ${sizeColor}</div>
                             </div>
-                            <div class="name">
-                                <div class="text-tiny mb-1">Quantity</div>
-                                <div class="body-title-2">${product.quantity || 0}</div>
+                            <div style="display: table-cell; padding: 12px 8px; border-right: 1px solid #f0f0f0; text-align: center; width: 80px;">
+                                <div style="font-size: 13px;">${quantity}</div>
                             </div>
-                            <div class="name">
-                                <div class="text-tiny mb-1">Unit Price</div>
-                                <div class="body-title-2">₹${(product.price || 0).toFixed(2)}</div>
+                            <div style="display: table-cell; padding: 12px 8px; border-right: 1px solid #f0f0f0; text-align: right; width: 100px;">
+                                <div style="font-size: 13px;">₹${unitPrice.toFixed(2)}</div>
                             </div>
-                            <div class="name">
-                                <div class="text-tiny mb-1">Total</div>
-                                <div class="body-title-2">₹${((product.price || 0) * (product.quantity || 0)).toFixed(2)}</div>
+                            <div style="display: table-cell; padding: 12px 8px; text-align: right; width: 100px;">
+                                <div style="font-weight: 600; font-size: 13px; color: #333;">₹${totalPrice.toFixed(2)}</div>
                             </div>
-                        </div>
-                    `;
+                        `;
                         itemsContainer.appendChild(productLi);
                     });
                 } else {
