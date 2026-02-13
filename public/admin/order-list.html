@@ -254,18 +254,7 @@
                                             </li>
                                         </ul>
                                     </li>-->
-                                    <li class="menu-item">
-                                        <a href="/admin/gallery.html" class="">
-                                            <div class="icon"><i class="icon-image"></i></div>
-                                            <div class="text">Gallery</div>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a href="/admin/report.html" class="">
-                                            <div class="icon"><i class="icon-pie-chart"></i></div>
-                                            <div class="text">Report</div>
-                                        </a>
-                                    </li>-->
+                                    -->
                                 </ul>
                             </div>
                             <div class="center-item">
@@ -909,16 +898,41 @@
                     li.className = "product-item gap14";
                     li.dataset.id = order.id; // Store order ID directly on the li for easy lookup
         
+                    // Build products HTML - horizontal layout with images
+                    let productsHtml = '';
+                    if (parsedProducts.length > 0) {
+                        productsHtml = '<div class="flex gap10 flex-wrap mt-2" style="max-width: 400px;">';
+                        parsedProducts.forEach((p, idx) => {
+                            if (idx < 4) { // Show max 4 products horizontally
+                                const productImage = p.image || p.main_image || '/admin/images/products/default-product.png';
+                                productsHtml += `
+                                    <div class="flex items-center gap10" style="background: #f9f9f9; padding: 5px 10px; border-radius: 8px; border: 1px solid #e0e0e0;">
+                                        <img src="${productImage}" alt="${p.name || 'Product'}"
+                                             style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                        <div>
+                                            <div class="text-tiny font-semibold" style="font-size: 11px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${p.name || 'Product'}</div>
+                                            <div class="text-tiny text-gray-500" style="font-size: 10px;">Qty: ${p.quantity || 1}</div>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        });
+                        if (parsedProducts.length > 4) {
+                            productsHtml += `<div class="flex items-center gap5 text-tiny text-gray-500">+${parsedProducts.length - 4} more</div>`;
+                        }
+                        productsHtml += '</div>';
+                    } else {
+                        productsHtml = '<div class="text-tiny text-gray-500">No products</div>';
+                    }
+
                     li.innerHTML = `
                         <div class="image no-bg">
                             <img src="${firstProductImage}" alt="${productNames.split(',')[0] || 'Order Product'}">
                         </div>
                         <div class="flex items-center justify-between gap20 flex-grow">
-                            <div class="name">
+                            <div class="name" style="min-width: 180px;">
                                 <a href="/admin/order-detail.html?id=${order.id}" class="body-title-2">${order.first_name || ''} ${order.last_name || ''}</a>
-                                <div class="text-tiny mt-1 text-gray-600 truncate" title="${productNames}">
-                                    ${productNames}
-                                </div>
+                                ${productsHtml}
                             </div>
                             <div class="body-text">#${order.razorpay_order_id || order.id || 'N/A'}</div>
                             <div class="body-text">₹${(parseFloat(order.amount) || 0).toFixed(2)}</div>
