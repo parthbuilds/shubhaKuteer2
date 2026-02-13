@@ -826,34 +826,33 @@
                                                 available. Card/Net banking acceptance subject to device availability.
                                             </div>
                                         </div>
-                                        <div class="wg-box gap10">
+                                        <div class="wg-box mb-20 gap10">
                                             <div class="body-title">Expected Date Of Delivery</div>
-                                            <div class="body-title-2 tf-color-2" id="expectedDeliveryDate">20 Nov 2023
+                                            <div class="body-title-2 tf-color-2" id="expectedDeliveryDate">--</div>
+                                        </div>
+                                        <div class="wg-box mb-20 gap10">
+                                            <div class="body-title">Delivery Status</div>
+                                            <div id="outForDeliveryStatus" class="body-text">
+                                                <strong>Out for Delivery:</strong> <span id="outForDeliveryTimestamp">N/A</span>
                                             </div>
-
-                                            <!-- Out for Delivery Status Display -->
-                                            <div id="outForDeliveryStatus" class="body-text mt-3"
-                                                >
-                                                <strong>Out for Delivery:</strong> <span
-                                                    id="outForDeliveryTimestamp">N/A</span>
-                                            </div>
-
-                                            <!-- Delivered Status Display -->
-                                            <div id="deliveredStatus" class="body-text mt-3">
+                                            <div id="deliveredStatus" class="body-text">
                                                 <strong>Delivered:</strong> <span id="deliveredTimestamp">N/A</span>
                                             </div>
-
-                                            <!-- Buttons Container -->
-                                            <div class="button-actions mt-3">
-                                                <button class="tf-button style-1 w-full mb-2" id="outForDeliveryButton"
-                                                    data-order-id="" style="display: none;">
-                                                    <i class="icon-truck"></i> Mark as Out for Delivery
-                                                </button>
-                                                <button class="tf-button style-1 w-full" id="deliveredButton"
-                                                    data-order-id="">
-                                                    <i class="icon-check-square"></i> Mark as Delivered
-                                                </button>
-                                            </div>
+                                        </div>
+                                        <div class="wg-box gap10">
+                                            <div class="body-title">Actions</div>
+                                            <button class="tf-button style-1 w-full mb-10" id="outForDeliveryButton"
+                                                data-order-id="">
+                                                <i class="icon-truck"></i> Mark as Out for Delivery
+                                            </button>
+                                            <button class="tf-button style-1 w-full mb-10" id="deliveredButton"
+                                                data-order-id="">
+                                                <i class="icon-check-square"></i> Mark as Delivered
+                                            </button>
+                                            <button class="tf-button w-full" id="viewDeliveryUpdatesBtn"
+                                                onclick="viewDeliveryUpdates()">
+                                                <i class="icon-eye"></i> View Delivery Updates
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -1072,7 +1071,7 @@
 
                     order.products.forEach((product, index) => {
                         const productLi = document.createElement('li');
-                        productLi.style.cssText = 'display: table-row; border-bottom: 1px solid #f0f0f0;';
+                        productLi.className = 'product-item gap14';
 
                         // Parse attributes if it's a string
                         let attributes = {};
@@ -1092,29 +1091,25 @@
                         const sizeColor = `${size} / ${color}`;
 
                         const categoryName = product.category || 'N/A';
-                        const brandName = product.brand || 'N/A';
+                        const brandName = product.brand || 'Shubha Kuteer';
                         const quantity = product.quantity || 0;
                         const unitPrice = parseFloat(product.price) || 0;
                         const totalPrice = unitPrice * quantity;
                         const productImage = product.image || '/admin/images/products/default-order.png';
 
                         productLi.innerHTML = `
-                            <div style="display: table-cell; padding: 12px 8px; border-right: 1px solid #f0f0f0; width: 70px;">
-                                <img src="${productImage}" alt="${product.name || 'Product'}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                            <div class="image no-bg">
+                                <img src="${productImage}" alt="${product.name || 'Product'}">
                             </div>
-                            <div style="display: table-cell; padding: 12px 8px; border-right: 1px solid #f0f0f0; min-width: 200px;">
-                                <div style="font-weight: 600; font-size: 13px; color: #333; margin-bottom: 4px;">${product.name || 'N/A'}</div>
-                                <div style="font-size: 11px; color: #888;">${categoryName} | ${brandName}</div>
-                                <div style="font-size: 11px; color: #666; margin-top: 4px;">Size/Color: ${sizeColor}</div>
-                            </div>
-                            <div style="display: table-cell; padding: 12px 8px; border-right: 1px solid #f0f0f0; text-align: center; width: 80px;">
-                                <div style="font-size: 13px;">${quantity}</div>
-                            </div>
-                            <div style="display: table-cell; padding: 12px 8px; border-right: 1px solid #f0f0f0; text-align: right; width: 100px;">
-                                <div style="font-size: 13px;">₹${unitPrice.toFixed(2)}</div>
-                            </div>
-                            <div style="display: table-cell; padding: 12px 8px; text-align: right; width: 100px;">
-                                <div style="font-weight: 600; font-size: 13px; color: #333;">₹${totalPrice.toFixed(2)}</div>
+                            <div class="flex items-center justify-between gap20 flex-grow">
+                                <div class="name">
+                                    <div class="body-title-2">${product.name || 'N/A'}</div>
+                                    <div class="text-tiny">${categoryName} | ${brandName}</div>
+                                    <div class="text-tiny">Size/Color: ${sizeColor}</div>
+                                </div>
+                                <div class="body-text">${quantity}</div>
+                                <div class="body-text">₹${unitPrice.toFixed(2)}</div>
+                                <div class="body-title-2">₹${totalPrice.toFixed(2)}</div>
                             </div>
                         `;
                         itemsContainer.appendChild(productLi);
@@ -1405,6 +1400,23 @@
                     deliveredButton.classList.remove('disabled-button-style');
                 }
             });
+        }
+
+        // View Delivery Updates - shows a summary of delivery status history
+        function viewDeliveryUpdates() {
+            const orderId = new URLSearchParams(window.location.search).get("id");
+            if (!orderId) { alert("No order ID found."); return; }
+
+            const outForDelivery = document.getElementById('outForDeliveryTimestamp')?.textContent || 'N/A';
+            const delivered = document.getElementById('deliveredTimestamp')?.textContent || 'N/A';
+            const expected = document.getElementById('expectedDeliveryDate')?.textContent || 'N/A';
+
+            let msg = `Delivery Updates for Order #${orderId}\n\n`;
+            msg += `Expected Delivery: ${expected.trim()}\n`;
+            msg += `Out for Delivery: ${outForDelivery.trim()}\n`;
+            msg += `Delivered: ${delivered.trim()}\n`;
+
+            alert(msg);
         }
 
         const urlParams = new URLSearchParams(window.location.search);

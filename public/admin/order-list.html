@@ -253,8 +253,7 @@
                                                 </a>
                                             </li>
                                         </ul>
-                                    </li>-->
-                                    -->
+                                    </li>
                                 </ul>
                             </div>
                             <div class="center-item">
@@ -732,86 +731,38 @@
                                     <div class="wg-table table-all-category">
                                         <ul class="table-title flex gap20 mb-14">
                                             <li>
-                                                <div class="body-title">Product</div>
+                                                <div class="body-title">Customer</div>
                                             </li>
                                             <li>
                                                 <div class="body-title">Order ID</div>
                                             </li>
                                             <li>
-                                                <div class="body-title">Price</div>
+                                                <div class="body-title">Amount</div>
                                             </li>
                                             <li>
-                                                <div class="body-title">Quantity</div>
+                                                <div class="body-title">Items</div>
                                             </li>
                                             <li>
-                                                <div class="body-title">Payment</div>
+                                                <div class="body-title">Email</div>
+                                            </li>
+                                            <li>
+                                                <div class="body-title">Date</div>
                                             </li>
                                             <li>
                                                 <div class="body-title">Status</div>
                                             </li>
                                             <li>
-                                                <div class="body-title">Payment Status</div>
-                                            </li>
-                                            <li>
                                                 <div class="body-title">Action</div>
                                             </li>
                                         </ul>
-                                        <ul class="flex flex-column">
-
-                                            <li class="product-item gap14">
-                                                <div class="image no-bg">
-                                                    <img src="/admin/images/products/59.png" alt="">
-                                                </div>
-                                                <div class="flex items-center justify-between gap20 flex-grow">
-                                                    <div class="name">
-                                                        <a href="/admin/product-list.html" class="body-title-2">Kristin
-                                                            Watson</a>
-                                                    </div>
-                                                    <div class="body-text">#7712309</div>
-                                                    <div class="body-text">₹1,452.500</div>
-                                                    <div class="body-text">1,638</div>
-                                                    <div class="body-text">20</div>
-                                                    <div>
-                                                        <div class="block-available">Success</div>
-                                                    </div>
-                                                    <div>
-                                                        <div class="block-tracking">Tracking</div>
-                                                    </div>
-                                                    <div class="list-icon-function">
-                                                        <div class="item eye">
-                                                            <i class="icon-eye"></i>
-                                                        </div>
-                                                        <div class="item edit">
-                                                            <i class="icon-edit-3"></i>
-                                                        </div>
-                                                        <div class="item trash">
-                                                            <i class="icon-trash-2"></i>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </li>
+                                        <ul id="orderListBody" class="flex flex-column">
+                                            <li class="product-item gap14"><div class="body-text">Loading orders...</div></li>
                                         </ul>
                                     </div>
                                     <div class="divider"></div>
                                     <div class="flex items-center justify-between flex-wrap gap10">
-                                        <div class="text-tiny">Showing 10 entries</div>
-                                        <ul class="wg-pagination">
-                                            <li>
-                                                <a href="#"><i class="icon-chevron-left"></i></a>
-                                            </li>
-                                            <li>
-                                                <a href="#">1</a>
-                                            </li>
-                                            <li class="active">
-                                                <a href="#">2</a>
-                                            </li>
-                                            <li>
-                                                <a href="#">3</a>
-                                            </li>
-                                            <li>
-                                                <a href="#"><i class="icon-chevron-right"></i></a>
-                                            </li>
-                                        </ul>
+                                        <div id="order-entries-info" class="text-tiny">Showing 0 entries</div>
+                                        <ul id="order-pagination" class="wg-pagination"></ul>
                                     </div>
                                 </div>
                                 <!-- /order-list -->
@@ -840,211 +791,171 @@
 
     <!-- Javascript -->
     <script>
+        let allOrders = [];
+        let currentPage = 1;
+        const pageSize = 10;
+
         document.addEventListener("DOMContentLoaded", async () => {
-            const orderList = document.querySelector(".table-all-category .flex-column");
-            orderList.innerHTML = `<li class="product-item gap14"><div class="body-text">Loading orders...</div></li>`; // Initial loading state
-        
+            const orderList = document.getElementById("orderListBody");
+            if (!orderList) { console.error('orderListBody element not found'); return; }
+            orderList.innerHTML = `<li class="product-item gap14"><div class="body-text">Loading orders...</div></li>`;
+
             try {
-                // 🧑‍💻 Check admin authentication
                 const authRes = await fetch("/api/admin/auth/check");
-                if (!authRes.ok) {
-                    console.warn("Admin not authenticated. Redirecting to login.");
-                    window.location.href = "/admin/login.html";
-                    return; // Stop execution if not authenticated
-                }
-        
-                // 🧾 Fetch orders
+                if (!authRes.ok) { window.location.href = "/admin/login.html"; return; }
+
                 const res = await fetch("/api/orders");
                 if (!res.ok) {
-                    // Log specific error if available
                     const errorData = await res.json().catch(() => ({ message: `HTTP status ${res.status}` }));
-                    throw new Error(`Server error fetching orders: ${errorData.message || res.statusText}`);
+                    throw new Error(errorData.message || res.statusText);
                 }
-                
+
                 const response = await res.json();
-                const orders = response.success && Array.isArray(response.orders) ? response.orders : [];
-        
-                orderList.innerHTML = ""; // Clear loading state
-        
-                if (!orders.length) {
-                    orderList.innerHTML = `<li class="product-item gap14"><div class="body-text text-gray-500">No orders found.</div></li>`;
-                    return; // Exit if no orders
-                }
-        
-                orders.forEach(order => {
-                    // *** CRITICAL FIX: Parse the products string into a JavaScript array ***
-                    let parsedProducts = [];
-                    if (typeof order.products === 'string') {
-                        try {
-                            parsedProducts = JSON.parse(order.products);
-                        } catch (parseError) {
-                            console.error("Error parsing products string for order ID:", order.id, parseError);
-                            // Continue with an empty array if parsing fails
-                        }
-                    } else if (Array.isArray(order.products)) {
-                        parsedProducts = order.products;
-                    }
-        
-                    // Calculate total items and get product names from the PARSED products
-                    const totalItems = parsedProducts.reduce((sum, p) => sum + (parseInt(p.quantity) || 0), 0);
-                    const productNames = parsedProducts.map(p => p.name).join(', ') || 'No products listed';
-                    
-                    // Get the first product image for display
-                    const firstProductImage = parsedProducts.length > 0 && parsedProducts[0].image 
-                                            ? parsedProducts[0].image 
-                                            : '/admin/images/products/default-order.png';
-        
-                    const li = document.createElement("li");
-                    li.className = "product-item gap14";
-                    li.dataset.id = order.id; // Store order ID directly on the li for easy lookup
-        
-                    // Build products HTML - one horizontal line per product with all details
-                    let productsHtml = '';
-                    if (parsedProducts.length > 0) {
-                        productsHtml = '<div class="products-table" style="margin-top: 8px;">';
+                allOrders = response.success && Array.isArray(response.orders) ? response.orders : [];
+                currentPage = 1;
+                renderOrderPage();
 
-                        parsedProducts.forEach((p, idx) => {
-                            const productImage = p.image || p.main_image || '/admin/images/products/default-product.png';
-                            const categoryName = p.category || 'N/A';
-                            const brandName = p.brand || 'N/A';
-
-                            // Extract size and color if available
-                            let sizeColor = 'N/A';
-                            if (p.selected_options) {
-                                const opts = typeof p.selected_options === 'string' ? JSON.parse(p.selected_options) : p.selected_options;
-                                if (opts.size && opts.color) {
-                                    sizeColor = `${opts.size} / ${opts.color}`;
-                                } else if (opts.size) {
-                                    sizeColor = opts.size;
-                                } else if (opts.color) {
-                                    sizeColor = opts.color;
-                                }
-                            }
-
-                            const quantity = p.quantity || 1;
-                            const unitPrice = parseFloat(p.price) || 0;
-                            const totalPrice = unitPrice * quantity;
-
-                            productsHtml += `
-                                <div style="display: table-row; border-bottom: 1px solid #f0f0f0;">
-                                    <div style="display: table-cell; padding: 12px 8px; border-right: 1px solid #f0f0f0;">
-                                        <img src="${productImage}" alt="${p.name || 'Product'}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
-                                    </div>
-                                    <div style="display: table-cell; padding: 12px 8px; border-right: 1px solid #f0f0f0; min-width: 200px;">
-                                        <div style="font-weight: 600; font-size: 13px; color: #333; margin-bottom: 4px;">${p.name || 'Product'}</div>
-                                        <div style="font-size: 11px; color: #888;">${categoryName} | ${brandName}</div>
-                                        <div style="font-size: 11px; color: #666; margin-top: 4px;">Size/Color: ${sizeColor}</div>
-                                    </div>
-                                    <div style="display: table-cell; padding: 12px 8px; border-right: 1px solid #f0f0f0; text-align: center;">
-                                        <div style="font-size: 13px;">${quantity}</div>
-                                    </div>
-                                    <div style="display: table-cell; padding: 12px 8px; border-right: 1px solid #f0f0f0; text-align: right;">
-                                        <div style="font-size: 13px;">₹${unitPrice.toFixed(2)}</div>
-                                    </div>
-                                    <div style="display: table-cell; padding: 12px 8px; border-right: 1px solid #f0f0f0; text-align: right;">
-                                        <div style="font-weight: 600; font-size: 13px; color: #333;">₹${totalPrice.toFixed(2)}</div>
-                                    </div>
-                                </div>
-                            `;
-                        });
-
-                        productsHtml += '</div>';
-                    } else {
-                        productsHtml = '<div class="text-tiny text-gray-500">No products</div>';
-                    }
-
-                    li.innerHTML = `
-                        <div class="image no-bg">
-                            <img src="${firstProductImage}" alt="${productNames.split(',')[0] || 'Order Product'}">
-                        </div>
-                        <div class="flex items-center justify-between gap20 flex-grow">
-                            <div class="name" style="min-width: 180px;">
-                                <a href="/admin/order-detail.html?id=${order.id}" class="body-title-2">${order.first_name || ''} ${order.last_name || ''}</a>
-                                ${productsHtml}
-                            </div>
-                            <div class="body-text">#${order.razorpay_order_id || order.id || 'N/A'}</div>
-                            <div class="body-text">₹${(parseFloat(order.amount) || 0).toFixed(2)}</div>
-                            <div class="body-text">${totalItems}</div>
-                            <div class="body-text">${order.email || 'N/A'}</div>
-                            <div class="body-text">${order.created_at ? new Date(order.created_at).toLocaleString() : 'N/A'}</div>
-                            <div>
-                                <div class="block-available ${order.status === 'completed' ? 'success' : order.status === 'pending' ? 'pending' : 'warning'}">
-                                    ${order.status || 'N/A'}
-                                </div>
-                            </div>
-                            <div class="list-icon-function">
-                                <div class="item eye" data-id="${order.id}"><i class="icon-eye"></i></div>
-                                <div class="item trash" data-id="${order.id}"><i class="icon-trash-2"></i></div>
-                            </div>
-                        </div>
-                    `;
-                    
-                    // Event listeners
-                    li.querySelector(".eye").addEventListener("click", (event) => {
-                        // Prevent navigating if the click was on a nested element that also has a default action
-                        event.preventDefault(); 
-                        window.location.href = `/admin/order-detail.html?id=${order.id}`;
-                    });
-                    li.querySelector(".trash").addEventListener("click", (event) => {
-                        event.stopPropagation(); // Prevent li click event if trash is clicked
-                        deleteOrder(order.id);
-                    });
-        
-                    orderList.appendChild(li);
-                });
-        
             } catch (err) {
-                console.error("⚠️ Error fetching orders:", err);
-                orderList.innerHTML = `<li class="product-item gap14"><div class="body-text text-red-500">Error loading orders: ${err.message}</div></li>`;
+                console.error("Error fetching orders:", err);
+                orderList.innerHTML = `<li class="product-item gap14"><div class="body-text">Error loading orders: ${err.message}</div></li>`;
             }
         });
-        
-        // 🗑️ Delete function
+
+        function renderOrderPage() {
+            const orderList = document.getElementById("orderListBody");
+            const entriesInfo = document.getElementById("order-entries-info");
+            const pagination = document.getElementById("order-pagination");
+            orderList.innerHTML = "";
+
+            if (!allOrders.length) {
+                orderList.innerHTML = `<li class="product-item gap14"><div class="body-text">No orders found.</div></li>`;
+                entriesInfo.textContent = "Showing 0 entries";
+                pagination.innerHTML = "";
+                return;
+            }
+
+            const total = allOrders.length;
+            const totalPages = Math.ceil(total / pageSize);
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            const start = (currentPage - 1) * pageSize;
+            const end = Math.min(currentPage * pageSize, total);
+            const pageOrders = allOrders.slice(start, end);
+
+            pageOrders.forEach(order => {
+                let parsedProducts = [];
+                if (typeof order.products === 'string') {
+                    try { parsedProducts = JSON.parse(order.products); } catch (e) { }
+                } else if (Array.isArray(order.products)) {
+                    parsedProducts = order.products;
+                }
+
+                const totalItems = parsedProducts.reduce((sum, p) => sum + (parseInt(p.quantity) || 0), 0);
+                const firstProduct = parsedProducts[0] || {};
+                const firstProductImage = firstProduct.image || '/admin/images/products/default-order.png';
+                const productName = firstProduct.name || 'Product';
+
+                const li = document.createElement("li");
+                li.className = "product-item gap14";
+                li.dataset.id = order.id;
+
+                li.innerHTML = `
+                    <div class="image no-bg">
+                        <img src="${firstProductImage}" alt="${productName}">
+                    </div>
+                    <div class="flex items-center justify-between gap20 flex-grow">
+                        <div class="name">
+                            <a href="/admin/order-detail.html?id=${order.id}" class="body-title-2">${order.first_name || ''} ${order.last_name || ''}</a>
+                            <div class="text-tiny">${productName}${parsedProducts.length > 1 ? ' + ' + (parsedProducts.length - 1) + ' more' : ''}</div>
+                        </div>
+                        <div class="body-text">#${order.razorpay_order_id || order.id || 'N/A'}</div>
+                        <div class="body-text">₹${(parseFloat(order.amount) || 0).toFixed(2)}</div>
+                        <div class="body-text">${totalItems}</div>
+                        <div class="body-text">${order.email || 'N/A'}</div>
+                        <div class="body-text">${order.created_at ? new Date(order.created_at).toLocaleString() : 'N/A'}</div>
+                        <div>
+                            <div class="block-available ${order.status === 'completed' ? 'success' : order.status === 'pending' ? 'pending' : 'warning'}">
+                                ${order.status || 'N/A'}
+                            </div>
+                        </div>
+                        <div class="list-icon-function">
+                            <div class="item eye"><i class="icon-eye"></i></div>
+                            <div class="item trash"><i class="icon-trash-2"></i></div>
+                        </div>
+                    </div>
+                `;
+
+                li.querySelector(".eye").addEventListener("click", (e) => {
+                    e.preventDefault();
+                    window.location.href = `/admin/order-detail.html?id=${order.id}`;
+                });
+                li.querySelector(".trash").addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    deleteOrder(order.id);
+                });
+
+                orderList.appendChild(li);
+            });
+
+            // Entries info
+            entriesInfo.textContent = `Showing ${start + 1}–${end} of ${total} entries`;
+
+            // Pagination
+            pagination.innerHTML = "";
+            const prevLi = document.createElement("li");
+            prevLi.innerHTML = `<a href="#"><i class="icon-chevron-left"></i></a>`;
+            if (currentPage === 1) prevLi.classList.add("disabled");
+            prevLi.addEventListener("click", e => { e.preventDefault(); if (currentPage > 1) { currentPage--; renderOrderPage(); } });
+            pagination.appendChild(prevLi);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pLi = document.createElement("li");
+                pLi.innerHTML = `<a href="#">${i}</a>`;
+                if (i === currentPage) pLi.classList.add("active");
+                pLi.addEventListener("click", e => { e.preventDefault(); currentPage = i; renderOrderPage(); });
+                pagination.appendChild(pLi);
+            }
+
+            const nextLi = document.createElement("li");
+            nextLi.innerHTML = `<a href="#"><i class="icon-chevron-right"></i></a>`;
+            if (currentPage === totalPages) nextLi.classList.add("disabled");
+            nextLi.addEventListener("click", e => { e.preventDefault(); if (currentPage < totalPages) { currentPage++; renderOrderPage(); } });
+            pagination.appendChild(nextLi);
+        }
+
         async function deleteOrder(id) {
-            if (!confirm("Are you sure you want to delete this order? This action cannot be undone.")) return;
+            if (!confirm("Are you sure you want to delete this order?")) return;
             try {
                 const res = await fetch(`/api/orders/${id}`, { method: "DELETE" });
                 const data = await res.json();
                 if (res.ok) {
                     alert("✅ " + (data.message || "Order deleted successfully!"));
-                    document.querySelector(`li[data-id="${id}"]`).remove(); // Remove the deleted item from the DOM
+                    allOrders = allOrders.filter(o => o.id !== parseInt(id) && o.id !== id);
+                    renderOrderPage();
                 } else {
-                    // Use specific error message from backend if available
                     alert("❌ Error: " + (data.error || data.message || "Failed to delete order."));
                 }
             } catch (err) {
                 console.error("Delete failed:", err);
-                alert("⚠️ Failed to delete order due to a network or server error.");
+                alert("Failed to delete order.");
             }
         }
-        
-        // Separate script for loading admin data (unchanged, but good to keep separate)
-        // This assumes elements with IDs "admin-name" and "admin-role" exist in your header/sidebar
+
         async function loadAdminData() {
             try {
                 const res = await fetch("/api/admin/users/me");
-                if (!res.ok) {
-                    console.warn("Admin data fetch failed. Redirecting to login.");
-                    window.location.href = "/admin/login.html";
-                    return; // Stop execution
-                }
+                if (!res.ok) { window.location.href = "/admin/login.html"; return; }
                 const data = await res.json();
-        
                 const adminNameEl = document.getElementById("admin-name");
                 const adminRoleEl = document.getElementById("admin-role");
-        
                 if (adminNameEl) adminNameEl.textContent = data.admin.name || 'Admin';
                 if (adminRoleEl) adminRoleEl.textContent = data.admin.role || 'Role';
-        
             } catch (err) {
                 console.error("Error loading admin data:", err);
-                // Optionally, display a message or leave defaults
             }
         }
-        
-        // Call admin data loading function
         loadAdminData();
-        </script>
+    </script>
         
     <script src="/admin/js/jquery.min.js"></script>
     <script src="/admin/js/bootstrap.min.js"></script>

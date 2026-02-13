@@ -27,104 +27,39 @@
         })();
     </script>
     <style>
-        /* Modal Styling */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        #couponFormSection { display: none; }
+        #couponFormSection .cols { display: flex; gap: 20px; }
+        #couponFormSection .cols > fieldset { flex: 1; }
+        #couponFormSection textarea { height: 80px !important; }
+        .category-dropdown { position: relative; }
+        .category-dropdown-toggle {
+            width: 100%; padding: 10px 14px; border: 1px solid var(--Input);
+            border-radius: 8px; font-size: 14px; background: #fff;
+            cursor: pointer; display: flex; align-items: center;
+            justify-content: space-between; min-height: 44px;
         }
-        .modal-dialog {
-            width: 90%;
-            max-width: 700px;
+        .category-dropdown-toggle:hover { border-color: #2275fc; }
+        .category-dropdown-toggle .placeholder { color: #999; }
+        .category-dropdown-menu {
+            display: none; position: absolute; top: 100%; left: 0; right: 0;
+            background: #fff; border: 1px solid var(--Input); border-radius: 8px;
+            margin-top: 4px; max-height: 200px; overflow-y: auto;
+            z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        .modal-content {
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-            overflow: hidden;
+        .category-dropdown-menu.open { display: block; }
+        .category-dropdown-menu label {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 14px; cursor: pointer; font-size: 14px;
+            transition: background 0.15s;
         }
-        .modal-header {
-            padding: 20px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .category-dropdown-menu label:hover { background: #f5f5f5; }
+        .category-dropdown-menu input[type="checkbox"] {
+            width: 16px; height: 16px; accent-color: #2275fc; cursor: pointer;
         }
-        .modal-header h4 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 600;
-        }
-        .modal-header .close {
-            background: none;
-            border: none;
-            color: #fff;
-            font-size: 28px;
-            cursor: pointer;
-            opacity: 0.8;
-            transition: opacity 0.2s;
-        }
-        .modal-header .close:hover {
-            opacity: 1;
-        }
-        .modal-body {
-            padding: 24px;
-            max-height: 70vh;
-            overflow-y: auto;
-        }
-        .modal-footer {
-            padding: 16px 24px;
-            background: #f8f9fa;
-            border-top: 1px solid #e9ecef;
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-        }
-        .modal-footer .tf-button {
-            margin: 0;
-        }
-        /* Form Styling */
-        #couponForm .form-group {
-            margin-bottom: 20px;
-        }
-        #couponForm label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            font-size: 13px;
-            color: #333;
-        }
-        #couponForm .form-control {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 13px;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            background: #fff;
-        }
-        #couponForm .form-control:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        #couponForm textarea.form-control {
-            resize: vertical;
-            min-height: 70px;
-        }
-        #couponForm input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            margin-right: 8px;
-            cursor: pointer;
+        .selected-cats { display: flex; flex-wrap: wrap; gap: 4px; }
+        .selected-cat-tag {
+            background: #e8f0fe; color: #2275fc; padding: 2px 8px;
+            border-radius: 4px; font-size: 12px;
         }
     </style>
 </head>
@@ -236,11 +171,6 @@
                                             <li class="sub-menu-item">
                                                 <a href="/admin/order-list.html" class="">
                                                     <div class="text">Order list</div>
-                                                </a>
-                                            </li>
-                                            <li class="sub-menu-item">
-                                                <a href="/admin/order-tracking.html" class="">
-                                                    <div class="text">Order tracking</div>
                                                 </a>
                                             </li>
                                         </ul>
@@ -408,6 +338,108 @@
                                     </ul>
                                 </div>
 
+                                <!-- coupon-form-section -->
+                                <div id="couponFormSection" class="wg-box mb-20">
+                                    <div class="flex items-center justify-between gap10 mb-20">
+                                        <h5 id="modalTitle">Add New Coupon</h5>
+                                    </div>
+                                    <form id="couponForm" class="form-add-product">
+                                        <input type="hidden" id="couponId">
+
+                                        <div class="cols">
+                                            <fieldset>
+                                                <div class="body-title mb-10">Code <span class="tf-color-1">*</span></div>
+                                                <input type="text" id="couponCode" required style="text-transform: uppercase;" placeholder="e.g., SAVE10">
+                                            </fieldset>
+                                            <fieldset>
+                                                <div class="body-title mb-10">Discount Type <span class="tf-color-1">*</span></div>
+                                                <div class="select">
+                                                    <select id="discountType" required onchange="handleDiscountTypeChange()">
+                                                        <option value="percentage">Percentage</option>
+                                                        <option value="fixed_amount">Fixed Amount</option>
+                                                        <option value="free_shipping">Free Shipping</option>
+                                                    </select>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+
+                                        <fieldset class="mt-20">
+                                            <div class="body-title mb-10">Description</div>
+                                            <textarea id="couponDescription" placeholder="Describe the coupon..."></textarea>
+                                        </fieldset>
+
+                                        <div class="cols mt-20">
+                                            <fieldset>
+                                                <div class="body-title mb-10">Discount Value <span class="tf-color-1">*</span></div>
+                                                <input type="number" id="discountValue" required min="0" step="0.01">
+                                                <span id="discountValueLabel" style="margin-left: 10px; font-weight: 600;">%</span>
+                                            </fieldset>
+                                            <fieldset>
+                                                <div class="body-title mb-10">Minimum Order Value</div>
+                                                <input type="number" id="minOrderValue" min="0" step="0.01" placeholder="0.00">
+                                            </fieldset>
+                                        </div>
+
+                                        <div class="cols mt-20">
+                                            <fieldset>
+                                                <div class="body-title mb-10">Max Discount Amount</div>
+                                                <input type="number" id="maxDiscountAmount" min="0" step="0.01" placeholder="Leave empty for unlimited">
+                                            </fieldset>
+                                            <fieldset>
+                                                <div class="body-title mb-10">Usage Limit (Total)</div>
+                                                <input type="number" id="usageLimit" min="1" placeholder="Leave empty for unlimited">
+                                            </fieldset>
+                                        </div>
+
+                                        <div class="cols mt-20">
+                                            <fieldset>
+                                                <div class="body-title mb-10">User Limit (Per User)</div>
+                                                <input type="number" id="userLimit" min="1" value="1">
+                                            </fieldset>
+                                            <fieldset>
+                                                <div class="body-title mb-10">&nbsp;</div>
+                                                <label><input type="checkbox" id="activeCoupon" checked> Active</label>
+                                            </fieldset>
+                                        </div>
+
+                                        <div class="cols mt-20">
+                                            <fieldset>
+                                                <div class="body-title mb-10">Start Date</div>
+                                                <input type="datetime-local" id="startDate">
+                                            </fieldset>
+                                            <fieldset>
+                                                <div class="body-title mb-10">End Date</div>
+                                                <input type="datetime-local" id="endDate">
+                                            </fieldset>
+                                        </div>
+
+                                        <div class="cols mt-20">
+                                            <fieldset>
+                                                <div class="body-title mb-10">Applicable Categories</div>
+                                                <div class="category-dropdown" id="categoryDropdown">
+                                                    <div class="category-dropdown-toggle" id="categoryDropdownToggle">
+                                                        <span class="selected-cats" id="selectedCatsDisplay"><span class="placeholder">All Categories</span></span>
+                                                        <i class="icon-chevron-down" style="font-size:12px; color:#999;"></i>
+                                                    </div>
+                                                    <div class="category-dropdown-menu" id="categoryDropdownMenu">
+                                                        <!-- populated by JS -->
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" id="applicableCategories">
+                                            </fieldset>
+                                            <fieldset>
+                                                <div class="body-title mb-10">Applicable Products</div>
+                                                <input type="text" id="applicableProducts" placeholder="Comma-separated product IDs">
+                                            </fieldset>
+                                        </div>
+
+                                        <div class="cols gap10 mt-20">
+                                            <button type="button" class="tf-button w-full" onclick="closeFormSection()">Cancel</button>
+                                            <button type="button" class="tf-button style-1 w-full" onclick="saveCoupon()">Save Coupon</button>
+                                        </div>
+                                    </form>
+                                </div>
+
                                 <!-- coupon-list -->
                                 <div class="wg-box mb-20">
                                     <div class="wg-filter flex items-center justify-between gap10 flex-wrap">
@@ -435,6 +467,11 @@
                                             <li class="product-item gap14"><div class="body-text">Loading coupons...</div></li>
                                         </ul>
                                     </div>
+                                    <div class="divider"></div>
+                                    <div class="flex items-center justify-between flex-wrap gap10">
+                                        <div id="coupon-entries-info" class="text-tiny"></div>
+                                        <ul id="coupon-pagination" class="wg-pagination"></ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -451,109 +488,12 @@
         </div>
     </div>
 
-    <!-- Add/Edit Coupon Modal -->
-    <div id="couponModal" class="modal" style="display: none;">
-        <div class="modal-dialog" style="max-width: 600px;">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 id="modalTitle">Add New Coupon</h4>
-                    <button type="button" class="close" onclick="closeModal()">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <form id="couponForm" style="max-height: 500px; overflow-y: auto;">
-                        <input type="hidden" id="couponId">
-
-                        <div class="form-group mb-3">
-                            <label>Code *</label>
-                            <input type="text" id="couponCode" class="form-control" required
-                                   style="text-transform: uppercase;"
-                                   placeholder="e.g., SAVE10">
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>Description</label>
-                            <textarea id="couponDescription" class="form-control" rows="2"
-                                      placeholder="Describe the coupon..."></textarea>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>Discount Type *</label>
-                            <select id="discountType" class="form-control" required onchange="handleDiscountTypeChange()">
-                                <option value="percentage">Percentage</option>
-                                <option value="fixed_amount">Fixed Amount</option>
-                                <option value="free_shipping">Free Shipping</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>Discount Value *</label>
-                            <input type="number" id="discountValue" class="form-control" required min="0" step="0.01">
-                            <span id="discountValueLabel" style="margin-left: 10px;">%</span>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>Minimum Order Value</label>
-                            <input type="number" id="minOrderValue" class="form-control" min="0" step="0.01" placeholder="0.00">
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>Max Discount Amount</label>
-                            <input type="number" id="maxDiscountAmount" class="form-control" min="0" step="0.01"
-                                   placeholder="Leave empty for unlimited">
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>Usage Limit (Total)</label>
-                            <input type="number" id="usageLimit" class="form-control" min="1" placeholder="Leave empty for unlimited">
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>User Limit (Per User)</label>
-                            <input type="number" id="userLimit" class="form-control" min="1" value="1">
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>Start Date</label>
-                            <input type="datetime-local" id="startDate" class="form-control">
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>End Date</label>
-                            <input type="datetime-local" id="endDate" class="form-control">
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>
-                                <input type="checkbox" id="activeCoupon" checked>
-                                Active
-                            </label>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>Applicable Categories (Optional)</label>
-                            <select id="applicableCategories" class="form-control" multiple size="5">
-                                <option value="">All Categories</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>Applicable Products (Optional)</label>
-                            <input type="text" id="applicableProducts" class="form-control"
-                                   placeholder="Comma-separated product IDs">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="tf-button" onclick="closeModal()">Cancel</button>
-                    <button type="button" class="tf-button btn-primary" onclick="saveCoupon()">Save Coupon</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <script>
         let allCoupons = [];
         let allCategories = [];
+        let couponCurrentPage = 1;
+        const couponPageSize = 10;
 
         // Load admin data
         async function loadAdminData() {
@@ -593,43 +533,89 @@
         }
 
         // Load categories
+        let selectedCategoryIds = [];
+
         async function loadCategories() {
             try {
                 const res = await fetch('/api/admin/categories/public');
                 if (!res.ok) throw new Error('Failed to load categories');
 
                 const categories = await res.json();
-                const select = document.getElementById('applicableCategories');
-
-                select.innerHTML = '<option value="">All Categories</option>';
-                categories.forEach(cat => {
-                    const option = document.createElement('option');
-                    option.value = cat.id;
-                    option.textContent = cat.name;
-                    select.appendChild(option);
-                });
-
                 allCategories = categories;
+
+                const menu = document.getElementById('categoryDropdownMenu');
+                menu.innerHTML = '';
+                categories.forEach(cat => {
+                    const label = document.createElement('label');
+                    label.innerHTML = `<input type="checkbox" value="${cat.id}" data-name="${cat.name}"> ${cat.name}`;
+                    label.querySelector('input').addEventListener('change', onCategoryCheckChange);
+                    menu.appendChild(label);
+                });
             } catch (error) {
                 console.error('Error loading categories:', error);
             }
         }
 
-        // Render coupons table
+        function onCategoryCheckChange() {
+            const checkboxes = document.querySelectorAll('#categoryDropdownMenu input[type=checkbox]');
+            selectedCategoryIds = [];
+            checkboxes.forEach(cb => { if (cb.checked) selectedCategoryIds.push(cb.value); });
+            updateCategoryDisplay();
+        }
+
+        function updateCategoryDisplay() {
+            const display = document.getElementById('selectedCatsDisplay');
+            const hidden = document.getElementById('applicableCategories');
+            if (selectedCategoryIds.length === 0) {
+                display.innerHTML = '<span class="placeholder">All Categories</span>';
+                hidden.value = '';
+            } else {
+                const names = [];
+                document.querySelectorAll('#categoryDropdownMenu input[type=checkbox]:checked').forEach(cb => {
+                    names.push(cb.dataset.name);
+                });
+                display.innerHTML = names.map(n => `<span class="selected-cat-tag">${n}</span>`).join('');
+                hidden.value = selectedCategoryIds.join(',');
+            }
+        }
+
+        // Toggle dropdown
+        document.getElementById('categoryDropdownToggle').addEventListener('click', () => {
+            document.getElementById('categoryDropdownMenu').classList.toggle('open');
+        });
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+            if (!document.getElementById('categoryDropdown').contains(e.target)) {
+                document.getElementById('categoryDropdownMenu').classList.remove('open');
+            }
+        });
+
+        // Render coupons table with pagination
         function renderCouponsTable() {
             const list = document.getElementById('couponsList');
+            const entriesInfo = document.getElementById('coupon-entries-info');
+            const pagination = document.getElementById('coupon-pagination');
 
             if (allCoupons.length === 0) {
                 list.innerHTML = '<li class="product-item gap14"><div class="body-text">No coupons found</div></li>';
+                entriesInfo.textContent = '';
+                pagination.innerHTML = '';
                 return;
             }
 
-            list.innerHTML = allCoupons.map(coupon => {
+            const total = allCoupons.length;
+            const totalPages = Math.ceil(total / couponPageSize);
+            if (couponCurrentPage > totalPages) couponCurrentPage = totalPages;
+            const start = (couponCurrentPage - 1) * couponPageSize;
+            const end = Math.min(couponCurrentPage * couponPageSize, total);
+            const pageCoupons = allCoupons.slice(start, end);
+
+            list.innerHTML = pageCoupons.map(coupon => {
                 const discountDisplay = coupon.discount_type === 'percentage'
                     ? `${coupon.discount_value}%`
                     : coupon.discount_type === 'free_shipping'
                     ? 'Free Shipping'
-                    : `₹${coupon.discount_value}`;
+                    : `\u20b9${coupon.discount_value}`;
 
                 const statusClass = coupon.active ? 'success' : 'warning';
                 const statusText = coupon.active ? 'Active' : 'Inactive';
@@ -639,17 +625,41 @@
                         <div style="flex: 1;"><strong style="color: #0066cc;">${coupon.code}</strong></div>
                         <div style="flex: 1;">${discountDisplay}</div>
                         <div style="flex: 1;">${coupon.discount_type.replace(/_/g, ' ').toUpperCase()}</div>
-                        <div style="flex: 1;">₹${coupon.min_order_value || '0'}</div>
+                        <div style="flex: 1;">\u20b9${coupon.min_order_value || '0'}</div>
                         <div style="flex: 1;">${coupon.usage_count || 0}${coupon.usage_limit ? '/' + coupon.usage_limit : ''}</div>
                         <div style="flex: 1;">${formatDate(coupon.end_date)}</div>
-                        <div style="flex: 1;"><span class="badge badge-${statusClass}">${statusText}</span></div>
-                        <div style="flex: 0 0 150px; display: flex; gap: 5px;">
-                            <button class="btn btn-sm btn-primary" onclick="editCoupon(${coupon.id})">Edit</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteCoupon(${coupon.id})">Delete</button>
+                        <div style="flex: 1;"><span class="block-available ${statusClass === 'success' ? '' : 'warning'}">${statusText}</span></div>
+                        <div class="list-icon-function">
+                            <div class="item edit" onclick="editCoupon(${coupon.id})"><i class="icon-edit-3"></i></div>
+                            <div class="item trash" onclick="deleteCoupon(${coupon.id})"><i class="icon-trash-2"></i></div>
                         </div>
                     </li>
                 `;
             }).join('');
+
+            // Entries info
+            entriesInfo.textContent = `Showing ${start + 1}\u2013${end} of ${total} entries`;
+
+            // Pagination
+            pagination.innerHTML = '';
+            if (totalPages <= 1) return;
+            const prevLi = document.createElement('li');
+            prevLi.innerHTML = '<a href="#"><i class="icon-chevron-left"></i></a>';
+            if (couponCurrentPage === 1) prevLi.classList.add('disabled');
+            prevLi.addEventListener('click', e => { e.preventDefault(); if (couponCurrentPage > 1) { couponCurrentPage--; renderCouponsTable(); } });
+            pagination.appendChild(prevLi);
+            for (let i = 1; i <= totalPages; i++) {
+                const pLi = document.createElement('li');
+                pLi.innerHTML = `<a href="#">${i}</a>`;
+                if (i === couponCurrentPage) pLi.classList.add('active');
+                pLi.addEventListener('click', e => { e.preventDefault(); couponCurrentPage = i; renderCouponsTable(); });
+                pagination.appendChild(pLi);
+            }
+            const nextLi = document.createElement('li');
+            nextLi.innerHTML = '<a href="#"><i class="icon-chevron-right"></i></a>';
+            if (couponCurrentPage === totalPages) nextLi.classList.add('disabled');
+            nextLi.addEventListener('click', e => { e.preventDefault(); if (couponCurrentPage < totalPages) { couponCurrentPage++; renderCouponsTable(); } });
+            pagination.appendChild(nextLi);
         }
 
         // Show add modal
@@ -658,7 +668,15 @@
             document.getElementById('couponForm').reset();
             document.getElementById('couponId').value = '';
             document.getElementById('activeCoupon').checked = true;
-            document.getElementById('couponModal').style.display = 'block';
+            resetCategoryCheckboxes();
+            document.getElementById('couponFormSection').style.display = 'block';
+            document.getElementById('couponFormSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetCategoryCheckboxes() {
+            selectedCategoryIds = [];
+            document.querySelectorAll('#categoryDropdownMenu input[type=checkbox]').forEach(cb => cb.checked = false);
+            updateCategoryDisplay();
         }
 
         // Edit coupon
@@ -683,7 +701,8 @@
             document.getElementById('activeCoupon').checked = coupon.active;
 
             handleDiscountTypeChange();
-            document.getElementById('couponModal').style.display = 'block';
+            document.getElementById('couponFormSection').style.display = 'block';
+            document.getElementById('couponFormSection').scrollIntoView({ behavior: 'smooth' });
         }
 
         // Save coupon
@@ -730,7 +749,7 @@
 
                 if (result.success) {
                     alert(isEdit ? 'Coupon updated successfully' : 'Coupon created successfully');
-                    closeModal();
+                    closeFormSection();
                     await loadCoupons();
                 } else {
                     alert(result.message || 'Failed to save coupon');
@@ -765,9 +784,12 @@
             }
         }
 
-        // Close modal
+        // Close form section
+        function closeFormSection() {
+            document.getElementById('couponFormSection').style.display = 'none';
+        }
         function closeModal() {
-            document.getElementById('couponModal').style.display = 'none';
+            closeFormSection();
         }
 
         // Handle discount type change

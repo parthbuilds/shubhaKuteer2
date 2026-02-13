@@ -630,6 +630,221 @@ export default async function handler(req, res) {
 
 
 
+        // Banners routes
+        if (pathname.startsWith('/api/admin/banners')) {
+            try {
+                const pool = await import("../backend/utils/db.js");
+
+                // GET all banners
+                if (pathname === '/api/admin/banners' && req.method === 'GET') {
+                    const [rows] = await pool.default.query(`
+                        SELECT * FROM banners ORDER BY position ASC, created_at DESC
+                    `);
+                    return res.status(200).json({ success: true, banners: rows });
+                }
+
+                // POST new banner
+                if (pathname === '/api/admin/banners' && req.method === 'POST') {
+                    const {
+                        title, description, banner_type, image_url, mobile_image_url,
+                        link_url, link_target, position, page_location,
+                        start_date, end_date, active
+                    } = req.body;
+
+                    if (!title || !banner_type || !image_url) {
+                        return res.status(400).json({ success: false, message: 'Title, banner type, and image URL are required' });
+                    }
+
+                    const [result] = await pool.default.query(`
+                        INSERT INTO banners (title, description, banner_type, image_url, mobile_image_url,
+                            link_url, link_target, position, page_location, start_date, end_date, active)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    `, [
+                        title, description || null, banner_type, image_url, mobile_image_url || null,
+                        link_url || null, link_target || '_self', parseInt(position) || 0,
+                        page_location || null, start_date || null, end_date || null,
+                        active !== undefined ? (active ? 1 : 0) : 1
+                    ]);
+
+                    return res.status(201).json({
+                        success: true,
+                        message: 'Banner created successfully',
+                        id: result.insertId
+                    });
+                }
+
+                // PUT update banner
+                if (pathname.startsWith('/api/admin/banners/') && req.method === 'PUT') {
+                    const id = pathname.split('/').pop();
+                    const {
+                        title, description, banner_type, image_url, mobile_image_url,
+                        link_url, link_target, position, page_location,
+                        start_date, end_date, active
+                    } = req.body;
+
+                    if (!title || !banner_type || !image_url) {
+                        return res.status(400).json({ success: false, message: 'Title, banner type, and image URL are required' });
+                    }
+
+                    const [result] = await pool.default.query(`
+                        UPDATE banners SET title=?, description=?, banner_type=?, image_url=?,
+                            mobile_image_url=?, link_url=?, link_target=?, position=?,
+                            page_location=?, start_date=?, end_date=?, active=?
+                        WHERE id=?
+                    `, [
+                        title, description || null, banner_type, image_url, mobile_image_url || null,
+                        link_url || null, link_target || '_self', parseInt(position) || 0,
+                        page_location || null, start_date || null, end_date || null,
+                        active !== undefined ? (active ? 1 : 0) : 1, id
+                    ]);
+
+                    if (result.affectedRows === 0) {
+                        return res.status(404).json({ success: false, message: 'Banner not found' });
+                    }
+
+                    return res.status(200).json({ success: true, message: 'Banner updated successfully' });
+                }
+
+                // DELETE banner
+                if (pathname.startsWith('/api/admin/banners/') && req.method === 'DELETE') {
+                    const id = pathname.split('/').pop();
+                    const [result] = await pool.default.query("DELETE FROM banners WHERE id = ?", [id]);
+
+                    if (result.affectedRows === 0) {
+                        return res.status(404).json({ success: false, message: 'Banner not found' });
+                    }
+
+                    return res.status(200).json({ success: true, message: 'Banner deleted successfully' });
+                }
+
+                return res.status(404).json({ message: "Banner endpoint not found" });
+            } catch (error) {
+                console.error("Banner operation error:", error);
+                return res.status(500).json({ message: "Banner operation failed", error: error.message });
+            }
+        }
+
+        // Cloudinary image delete (server-side, needs API secret)
+        if (pathname === '/api/admin/cloudinary/delete' && req.method === 'POST') {
+            try {
+                const cloudinary = await import("../backend/utils/cloudinary.js");
+                const { public_id } = req.body;
+
+                if (!public_id) {
+                    return res.status(400).json({ success: false, message: 'public_id is required' });
+                }
+
+                const result = await cloudinary.default.uploader.destroy(public_id);
+                return res.status(200).json({ success: true, result });
+            } catch (error) {
+                console.error("Cloudinary delete error:", error);
+                return res.status(500).json({ success: false, message: "Failed to delete image from Cloudinary", error: error.message });
+            }
+        }
+
+        // Coupons routes
+        if (pathname.startsWith('/api/admin/coupons')) {
+            try {
+                const pool = await import("../backend/utils/db.js");
+
+                // GET all coupons
+                if (pathname === '/api/admin/coupons' && req.method === 'GET') {
+                    const [rows] = await pool.default.query(`
+                        SELECT * FROM coupons ORDER BY created_at DESC
+                    `);
+                    return res.status(200).json({ success: true, coupons: rows });
+                }
+
+                // POST new coupon
+                if (pathname === '/api/admin/coupons' && req.method === 'POST') {
+                    const {
+                        code, description, discount_type, discount_value,
+                        min_order_value, max_discount_amount, usage_limit,
+                        user_limit, start_date, end_date, active
+                    } = req.body;
+
+                    if (!code || !discount_type) {
+                        return res.status(400).json({ success: false, message: 'Code and discount type are required' });
+                    }
+
+                    const [result] = await pool.default.query(`
+                        INSERT INTO coupons (code, description, discount_type, discount_value,
+                            min_order_value, max_discount_amount, usage_limit, user_limit,
+                            start_date, end_date, active)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    `, [
+                        code.toUpperCase(), description || null, discount_type,
+                        parseFloat(discount_value) || 0,
+                        min_order_value != null ? parseFloat(min_order_value) : null,
+                        max_discount_amount != null ? parseFloat(max_discount_amount) : null,
+                        usage_limit != null ? parseInt(usage_limit) : null,
+                        parseInt(user_limit) || 1,
+                        start_date || null, end_date || null,
+                        active !== undefined ? (active ? 1 : 0) : 1
+                    ]);
+
+                    return res.status(201).json({
+                        success: true,
+                        message: 'Coupon created successfully',
+                        id: result.insertId
+                    });
+                }
+
+                // PUT update coupon
+                if (pathname.startsWith('/api/admin/coupons/') && req.method === 'PUT') {
+                    const id = pathname.split('/').pop();
+                    const {
+                        code, description, discount_type, discount_value,
+                        min_order_value, max_discount_amount, usage_limit,
+                        user_limit, start_date, end_date, active
+                    } = req.body;
+
+                    if (!code || !discount_type) {
+                        return res.status(400).json({ success: false, message: 'Code and discount type are required' });
+                    }
+
+                    const [result] = await pool.default.query(`
+                        UPDATE coupons SET code=?, description=?, discount_type=?, discount_value=?,
+                            min_order_value=?, max_discount_amount=?, usage_limit=?, user_limit=?,
+                            start_date=?, end_date=?, active=?
+                        WHERE id=?
+                    `, [
+                        code.toUpperCase(), description || null, discount_type,
+                        parseFloat(discount_value) || 0,
+                        min_order_value != null ? parseFloat(min_order_value) : null,
+                        max_discount_amount != null ? parseFloat(max_discount_amount) : null,
+                        usage_limit != null ? parseInt(usage_limit) : null,
+                        parseInt(user_limit) || 1,
+                        start_date || null, end_date || null,
+                        active !== undefined ? (active ? 1 : 0) : 1, id
+                    ]);
+
+                    if (result.affectedRows === 0) {
+                        return res.status(404).json({ success: false, message: 'Coupon not found' });
+                    }
+
+                    return res.status(200).json({ success: true, message: 'Coupon updated successfully' });
+                }
+
+                // DELETE coupon
+                if (pathname.startsWith('/api/admin/coupons/') && req.method === 'DELETE') {
+                    const id = pathname.split('/').pop();
+                    const [result] = await pool.default.query("DELETE FROM coupons WHERE id = ?", [id]);
+
+                    if (result.affectedRows === 0) {
+                        return res.status(404).json({ success: false, message: 'Coupon not found' });
+                    }
+
+                    return res.status(200).json({ success: true, message: 'Coupon deleted successfully' });
+                }
+
+                return res.status(404).json({ message: "Coupon endpoint not found" });
+            } catch (error) {
+                console.error("Coupon operation error:", error);
+                return res.status(500).json({ message: "Coupon operation failed", error: error.message });
+            }
+        }
+
         // Admin Users routes (for managing admins)
         if (pathname.startsWith('/api/admin/users')) {
             try {

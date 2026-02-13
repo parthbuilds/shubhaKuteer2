@@ -253,7 +253,7 @@
                                                 </a>
                                             </li>
                                         </ul>
-                                    </li>-->-->
+                                    </li>-->
                                 </ul>
                             </div>
                             <div class="center-item">
@@ -760,24 +760,8 @@
                                     </div>
                                     <div class="divider"></div>
                                     <div class="flex items-center justify-between flex-wrap gap10">
-                                        <div class="text-tiny">Showing 10 entries</div>
-                                        <ul class="wg-pagination">
-                                            <li>
-                                                <a href="#"><i class="icon-chevron-left"></i></a>
-                                            </li>
-                                            <li>
-                                                <a href="#">1</a>
-                                            </li>
-                                            <li class="active">
-                                                <a href="#">2</a>
-                                            </li>
-                                            <li>
-                                                <a href="#">3</a>
-                                            </li>
-                                            <li>
-                                                <a href="#"><i class="icon-chevron-right"></i></a>
-                                            </li>
-                                        </ul>
+                                        <div id="attr-entries-info" class="text-tiny"></div>
+                                        <ul id="attr-pagination" class="wg-pagination"></ul>
                                     </div>
                                 </div>
                                 <!-- /all-attribute -->
@@ -808,97 +792,136 @@
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
             const attributeList = document.getElementById("attributeList");
+            let allAttributes = [];
+            let attrCurrentPage = 1;
+            const attrPageSize = 10;
 
             async function loadAttributes() {
                 attributeList.innerHTML = `
-                    <li class="attribute-item gap14"><div class="body-text">Loading attributes...</div></li>
+                    <li class="product-item gap14"><div class="body-text">Loading attributes...</div></li>
                 `;
 
                 try {
                     const res = await fetch("/api/admin/attributes");
                     if (!res.ok) throw new Error("Server error " + res.status);
 
-                    const attributes = await res.json();
-                    attributeList.innerHTML = "";
-
-                    if (!attributes.length) {
-                        attributeList.innerHTML = `
-                            <li class="attribute-item gap14"><div class="body-text">No attributes found</div></li>
-                        `;
-                        return;
-                    }
-
-                    attributes.forEach(attr => {
-                        const li = document.createElement("li");
-                        li.className = "attribute-item gap14";
-                        li.dataset.id = attr.id;
-
-                        const created = attr.created_at ? new Date(attr.created_at).toLocaleDateString() : "-";
-
-                        // Parse and display attribute values in a readable format
-                        let valuesText = "No values";
-                        let valuesArray = [];
-
-                        if (attr.attribute_values) {
-                            try {
-                                // If it's already an object or array, use it directly
-                                if (typeof attr.attribute_values === 'object') {
-                                    valuesArray = attr.attribute_values;
-                                }
-                                // If it's still a string (older DB entries or fallback), parse it
-                                else if (typeof attr.attribute_values === 'string') {
-                                    valuesArray = JSON.parse(attr.attribute_values);
-                                }
-
-                                if (Array.isArray(valuesArray)) {
-                                    valuesText = valuesArray.map(v => {
-                                        if (typeof v === 'object') {
-                                            const firstValue = Object.values(v)[0];
-                                            return firstValue || '';
-                                        } else if (typeof v === 'string') {
-                                            return v;
-                                        }
-                                        return '';
-                                    }).filter(Boolean).join(', ');
-                                }
-                            } catch (e) {
-                                console.error(`Failed to parse JSON for attribute ID ${attr.id}:`, e);
-                                valuesText = "Invalid JSON data";
-                            }
-                        }
-
-
-                        li.innerHTML = `
-                            <div class="flex items-center justify-between gap20 flex-grow">
-                                <div class="name">
-                                    <span class="body-title-2">${attr.category_name || 'Uncategorized'}</span>
-                                </div>
-                                <div class="body-text">
-                                    <strong>${attr.attribute_name}:</strong> ${valuesText}
-                                </div>
-                                <div class="body-text">${created}</div>
-                                <div class="list-icon-function">
-                                    <div class="item eye" title="View" onclick="viewAttribute(${attr.id})">
-                                        <i class="icon-eye"></i>
-                                    </div>
-                                    <div class="item edit" title="Edit" onclick="editAttribute(${attr.id})">
-                                        <i class="icon-edit-3"></i>
-                                    </div>
-                                    <div class="item trash" title="Delete" onclick="deleteAttribute(${attr.id})">
-                                        <i class="icon-trash-2"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                        attributeList.appendChild(li);
-                    });
+                    allAttributes = await res.json();
+                    attrCurrentPage = 1;
+                    renderAttrPage();
 
                 } catch (err) {
-                    console.error("⚠️ Error fetching attributes:", err);
+                    console.error("Error fetching attributes:", err);
                     attributeList.innerHTML = `
-                        <li class="attribute-item gap14"><div class="body-text">Error loading attributes</div></li>
+                        <li class="product-item gap14"><div class="body-text">Error loading attributes</div></li>
                     `;
                 }
+            }
+
+            function renderAttrPage() {
+                attributeList.innerHTML = "";
+                const entriesInfo = document.getElementById('attr-entries-info');
+                const pagination = document.getElementById('attr-pagination');
+
+                if (!allAttributes.length) {
+                    attributeList.innerHTML = `
+                        <li class="product-item gap14"><div class="body-text">No attributes found</div></li>
+                    `;
+                    entriesInfo.textContent = '';
+                    pagination.innerHTML = '';
+                    return;
+                }
+
+                const total = allAttributes.length;
+                const totalPages = Math.ceil(total / attrPageSize);
+                if (attrCurrentPage > totalPages) attrCurrentPage = totalPages;
+                const start = (attrCurrentPage - 1) * attrPageSize;
+                const end = Math.min(attrCurrentPage * attrPageSize, total);
+                const pageAttrs = allAttributes.slice(start, end);
+
+                pageAttrs.forEach(attr => {
+                    const li = document.createElement("li");
+                    li.className = "product-item gap14";
+                    li.dataset.id = attr.id;
+
+                    const created = attr.created_at ? new Date(attr.created_at).toLocaleDateString() : "-";
+
+                    // Parse and display attribute values in a readable format
+                    let valuesText = "No values";
+                    let valuesArray = [];
+
+                    if (attr.attribute_values) {
+                        try {
+                            if (typeof attr.attribute_values === 'object') {
+                                valuesArray = attr.attribute_values;
+                            } else if (typeof attr.attribute_values === 'string') {
+                                valuesArray = JSON.parse(attr.attribute_values);
+                            }
+
+                            if (Array.isArray(valuesArray)) {
+                                valuesText = valuesArray.map(v => {
+                                    if (typeof v === 'object') {
+                                        const firstValue = Object.values(v)[0];
+                                        return firstValue || '';
+                                    } else if (typeof v === 'string') {
+                                        return v;
+                                    }
+                                    return '';
+                                }).filter(Boolean).join(', ');
+                            }
+                        } catch (e) {
+                            console.error(`Failed to parse JSON for attribute ID ${attr.id}:`, e);
+                            valuesText = "Invalid JSON data";
+                        }
+                    }
+
+                    li.innerHTML = `
+                        <div class="flex items-center justify-between gap20 flex-grow">
+                            <div class="name">
+                                <a href="#" class="body-title-2">${attr.category_name || 'Uncategorized'}</a>
+                            </div>
+                            <div class="body-text">
+                                <strong>${attr.attribute_name}:</strong> ${valuesText}
+                            </div>
+                            <div class="body-text">${created}</div>
+                            <div class="list-icon-function">
+                                <div class="item eye" title="View" onclick="viewAttribute(${attr.id})">
+                                    <i class="icon-eye"></i>
+                                </div>
+                                <div class="item edit" title="Edit" onclick="editAttribute(${attr.id})">
+                                    <i class="icon-edit-3"></i>
+                                </div>
+                                <div class="item trash" title="Delete" onclick="deleteAttribute(${attr.id})">
+                                    <i class="icon-trash-2"></i>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    attributeList.appendChild(li);
+                });
+
+                // Entries info
+                entriesInfo.textContent = `Showing ${start + 1}\u2013${end} of ${total} entries`;
+
+                // Pagination
+                pagination.innerHTML = '';
+                if (totalPages <= 1) return;
+                const prevLi = document.createElement('li');
+                prevLi.innerHTML = '<a href="#"><i class="icon-chevron-left"></i></a>';
+                if (attrCurrentPage === 1) prevLi.classList.add('disabled');
+                prevLi.addEventListener('click', e => { e.preventDefault(); if (attrCurrentPage > 1) { attrCurrentPage--; renderAttrPage(); } });
+                pagination.appendChild(prevLi);
+                for (let i = 1; i <= totalPages; i++) {
+                    const pLi = document.createElement('li');
+                    pLi.innerHTML = `<a href="#">${i}</a>`;
+                    if (i === attrCurrentPage) pLi.classList.add('active');
+                    pLi.addEventListener('click', e => { e.preventDefault(); attrCurrentPage = i; renderAttrPage(); });
+                    pagination.appendChild(pLi);
+                }
+                const nextLi = document.createElement('li');
+                nextLi.innerHTML = '<a href="#"><i class="icon-chevron-right"></i></a>';
+                if (attrCurrentPage === totalPages) nextLi.classList.add('disabled');
+                nextLi.addEventListener('click', e => { e.preventDefault(); if (attrCurrentPage < totalPages) { attrCurrentPage++; renderAttrPage(); } });
+                pagination.appendChild(nextLi);
             }
 
             // View attribute details

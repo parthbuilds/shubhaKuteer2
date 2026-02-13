@@ -123,6 +123,31 @@
             border-radius: 4px;
         }
 
+        .btn-remove-image {
+            position: absolute !important;
+            top: -6px !important;
+            right: -6px !important;
+            width: 22px !important;
+            height: 22px !important;
+            min-width: 22px !important;
+            min-height: 22px !important;
+            max-width: 22px !important;
+            max-height: 22px !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            background: #ef4444 !important;
+            color: #fff !important;
+            border: 2px solid #fff !important;
+            border-radius: 50% !important;
+            font-size: 14px !important;
+            line-height: 1 !important;
+            cursor: pointer;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            z-index: 2;
+        }
         .btn-remove-image:hover {
             background: #dc2626 !important;
             transform: scale(1.1);
@@ -348,7 +373,7 @@
                                                 </a>
                                             </li>
                                         </ul>
-                                    </li>-->-->
+                                    </li>-->
                                 </ul>
                             </div>
                             <div class="center-item">
@@ -1212,7 +1237,11 @@
                     checkbox.addEventListener("change", e => {
                         const name = e.target.dataset.attributeName;
                         const val = e.target.value;
-                        const colorCode = e.target.dataset.code;
+                        let colorCode = e.target.dataset.code;
+
+                        // If color attribute, read the hex picker value
+                        const hexInput = checkboxContainer.querySelector('.color-hex-input');
+                        if (hexInput && hexInput.value) colorCode = hexInput.value;
 
                         const variantData = { value: val };
                         if (colorCode) variantData.code = colorCode;
@@ -1258,6 +1287,57 @@
 
                     checkboxContainer.appendChild(checkbox);
                     checkboxContainer.appendChild(label);
+
+                    // Add color hex picker for color attributes
+                    if (attributeName.toLowerCase() === "color") {
+                        const colorPickerWrap = document.createElement("div");
+                        colorPickerWrap.style.cssText = "display: inline-flex; align-items: center; gap: 4px; margin-left: 4px;";
+
+                        const colorInput = document.createElement("input");
+                        colorInput.type = "color";
+                        colorInput.className = "color-hex-input";
+                        colorInput.value = code || "#000000";
+                        colorInput.style.cssText = "width: 28px; height: 28px; padding: 0; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;";
+                        colorInput.title = "Pick color hex";
+
+                        const hexText = document.createElement("input");
+                        hexText.type = "text";
+                        hexText.value = code || "#000000";
+                        hexText.maxLength = 7;
+                        hexText.style.cssText = "width: 75px; padding: 4px 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; font-family: monospace;";
+                        hexText.placeholder = "#hex";
+
+                        // Sync color picker and text input
+                        colorInput.addEventListener("input", () => {
+                            hexText.value = colorInput.value;
+                            checkbox.dataset.code = colorInput.value;
+                            if (checkbox.checked) {
+                                const name = checkbox.dataset.attributeName;
+                                const v = checkbox.value;
+                                const existing = selectedAttributeVariants[name]?.find(x => x.value === v);
+                                if (existing) existing.code = colorInput.value;
+                                updateVariationsHidden();
+                            }
+                        });
+                        hexText.addEventListener("change", () => {
+                            let hex = hexText.value.trim();
+                            if (!hex.startsWith("#")) hex = "#" + hex;
+                            colorInput.value = hex;
+                            checkbox.dataset.code = hex;
+                            if (checkbox.checked) {
+                                const name = checkbox.dataset.attributeName;
+                                const v = checkbox.value;
+                                const existing = selectedAttributeVariants[name]?.find(x => x.value === v);
+                                if (existing) existing.code = hex;
+                                updateVariationsHidden();
+                            }
+                        });
+
+                        colorPickerWrap.appendChild(colorInput);
+                        colorPickerWrap.appendChild(hexText);
+                        checkboxContainer.appendChild(colorPickerWrap);
+                    }
+
                     wrapperDiv.appendChild(checkboxContainer);
                 });
 
@@ -1406,20 +1486,7 @@
                             const removeBtn = document.createElement('button');
                             removeBtn.innerHTML = '&times;';
                             removeBtn.className = 'btn-remove-image';
-                            removeBtn.style.position = 'absolute';
-                            removeBtn.style.top = '-5px';
-                            removeBtn.style.right = '-5px';
-                            removeBtn.style.background = 'red';
-                            removeBtn.style.color = 'white';
-                            removeBtn.style.border = 'none';
-                            removeBtn.style.borderRadius = '50%';
-                            removeBtn.style.width = '20px';
-                            removeBtn.style.height = '20px';
-                            removeBtn.style.cursor = 'pointer';
-                            removeBtn.style.lineHeight = '18px';
-                            removeBtn.style.fontSize = '14px';
-                            removeBtn.style.padding = '0';
-                            removeBtn.type = 'button'; // Prevent form submit
+                            removeBtn.type = 'button';
 
                             removeBtn.onclick = () => {
                                 uploadedGallery = uploadedGallery.filter(u => u !== url);
@@ -1596,41 +1663,24 @@
                         uploadedMainImage = product.main_image;
                         const mainPreview = mainImagePreviewContainer;
                         // Clear existing
-                        mainPreview.querySelectorAll('.uploaded-img-preview').forEach(img => img.remove());
+                        mainPreview.querySelectorAll('.uploaded-img-preview').forEach(el => el.remove());
+                        mainPreview.querySelectorAll('.relative').forEach(el => el.remove());
 
-                        // Create wrapper for image + remove button
                         const wrapper = document.createElement('div');
                         wrapper.className = 'relative inline-block';
-                        wrapper.style.position = 'relative';
-                        wrapper.style.display = 'inline-block';
+                        wrapper.style.cssText = 'position:relative; display:inline-block; margin-top:10px;';
 
                         const img = document.createElement('img');
                         img.src = uploadedMainImage;
                         img.style.maxWidth = '100px';
                         img.style.maxHeight = '100px';
-                        img.style.marginTop = '10px';
                         img.className = 'uploaded-img-preview';
                         img.style.display = 'block';
 
-                        // Add remove button
                         const removeBtn = document.createElement('button');
                         removeBtn.innerHTML = '&times;';
                         removeBtn.className = 'btn-remove-image';
-                        removeBtn.style.position = 'absolute';
-                        removeBtn.style.top = '-5px';
-                        removeBtn.style.right = '-5px';
-                        removeBtn.style.background = 'red';
-                        removeBtn.style.color = 'white';
-                        removeBtn.style.border = 'none';
-                        removeBtn.style.borderRadius = '50%';
-                        removeBtn.style.width = '20px';
-                        removeBtn.style.height = '20px';
-                        removeBtn.style.cursor = 'pointer';
-                        removeBtn.style.lineHeight = '18px';
-                        removeBtn.style.fontSize = '14px';
-                        removeBtn.style.padding = '0';
                         removeBtn.type = 'button';
-
                         removeBtn.onclick = () => {
                             uploadedMainImage = "";
                             wrapper.remove();
@@ -1664,16 +1714,6 @@
                                 const removeBtn = document.createElement('button');
                                 removeBtn.innerHTML = '&times;';
                                 removeBtn.className = 'btn-remove-image';
-                                removeBtn.style.position = 'absolute';
-                                removeBtn.style.top = '-5px';
-                                removeBtn.style.right = '-5px';
-                                removeBtn.style.background = 'red';
-                                removeBtn.style.color = 'white';
-                                removeBtn.style.border = 'none';
-                                removeBtn.style.borderRadius = '50%';
-                                removeBtn.style.width = '20px';
-                                removeBtn.style.height = '20px';
-                                removeBtn.style.cursor = 'pointer';
                                 removeBtn.type = 'button';
 
                                 removeBtn.onclick = () => {

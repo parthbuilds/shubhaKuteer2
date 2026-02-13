@@ -27,119 +27,61 @@
         })();
     </script>
     <style>
-        /* Modal Styling */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 9999;
+        #bannerFormSection { display: none; }
+        #bannerFormSection .cols { display: flex; gap: 20px; }
+        #bannerFormSection .cols > fieldset { flex: 1; }
+        #bannerFormSection textarea { height: 80px !important; }
+        .img-preview-wrap {
+            position: relative;
+            display: inline-block;
+            margin-top: 8px;
+        }
+        .img-preview-wrap img {
+            max-width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            display: block;
+        }
+        .img-remove-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ff4d4f;
+            color: #fff;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            z-index: 10;
         }
-        .modal-dialog {
-            width: 90%;
-            max-width: 700px;
+        .img-remove-btn:hover {
+            background: #d9363e;
+            transform: scale(1.1);
         }
-        .modal-content {
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-            overflow: hidden;
-        }
-        .modal-header {
-            padding: 20px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
+        .upload-drop-zone {
+            cursor: pointer;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            min-height: 120px;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
+            transition: border-color 0.2s;
         }
-        .modal-header h4 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 600;
-        }
-        .modal-header .close {
-            background: none;
-            border: none;
-            color: #fff;
-            font-size: 28px;
-            cursor: pointer;
-            opacity: 0.8;
-            transition: opacity 0.2s;
-        }
-        .modal-header .close:hover {
-            opacity: 1;
-        }
-        .modal-body {
-            padding: 24px;
-            max-height: 70vh;
-            overflow-y: auto;
-        }
-        .modal-footer {
-            padding: 16px 24px;
-            background: #f8f9fa;
-            border-top: 1px solid #e9ecef;
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-        }
-        .modal-footer .tf-button {
-            margin: 0;
-        }
-        /* Form Styling */
-        #bannerForm .form-group {
-            margin-bottom: 20px;
-        }
-        #bannerForm label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            font-size: 13px;
-            color: #333;
-        }
-        #bannerForm .form-control {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 13px;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            background: #fff;
-        }
-        #bannerForm .form-control:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        #bannerForm textarea.form-control {
-            resize: vertical;
-            min-height: 70px;
-        }
-        #bannerForm input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            margin-right: 8px;
-            cursor: pointer;
-        }
-        #bannerForm input[type="checkbox"] + label {
-            display: inline;
-            cursor: pointer;
-        }
-        #imagePreview {
-            margin-top: 10px;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid #e0e0e0;
-        }
-        #imagePreview img {
-            max-width: 100%;
-            height: auto;
-            display: block;
+        .upload-drop-zone:hover {
+            border-color: #2275fc;
         }
     </style>
 </head>
@@ -251,11 +193,6 @@
                                             <li class="sub-menu-item">
                                                 <a href="/admin/order-list.html" class="">
                                                     <div class="text">Order list</div>
-                                                </a>
-                                            </li>
-                                            <li class="sub-menu-item">
-                                                <a href="/admin/order-tracking.html" class="">
-                                                    <div class="text">Order tracking</div>
                                                 </a>
                                             </li>
                                         </ul>
@@ -423,6 +360,140 @@
                                     </ul>
                                 </div>
 
+                                <!-- banner-form-section -->
+                                <div id="bannerFormSection" class="wg-box mb-20">
+                                    <div class="flex items-center justify-between gap10 mb-20">
+                                        <h5 id="modalTitle">Add New Banner</h5>
+                                    </div>
+                                    <form id="bannerForm" class="form-add-product">
+                                        <input type="hidden" id="bannerId">
+
+                                        <div class="cols">
+                                            <fieldset>
+                                                <div class="body-title mb-10">Title <span class="tf-color-1">*</span></div>
+                                                <input type="text" id="bannerTitle" required placeholder="e.g., Summer Sale">
+                                            </fieldset>
+                                            <fieldset>
+                                                <div class="body-title mb-10">Banner Type <span class="tf-color-1">*</span></div>
+                                                <div class="select">
+                                                    <select id="bannerType" required>
+                                                        <option value="hero">Hero</option>
+                                                        <option value="category">Category</option>
+                                                        <option value="promotional">Promotional</option>
+                                                        <option value="sidebar">Sidebar</option>
+                                                        <option value="footer">Footer</option>
+                                                    </select>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+
+                                        <fieldset class="mt-20">
+                                            <div class="body-title mb-10">Description</div>
+                                            <textarea id="bannerDescription" placeholder="Banner description..."></textarea>
+                                        </fieldset>
+
+                                        <div class="cols mt-20">
+                                            <fieldset>
+                                                <div class="body-title mb-10">Banner Image <span class="tf-color-1">*</span></div>
+                                                <input type="hidden" id="imageUrl">
+                                                <div id="imageUploadArea">
+                                                    <div class="upload-drop-zone" id="mainImageUpload">
+                                                        <i class="icon-upload-cloud" style="font-size:28px; color:#999; margin-bottom:8px;"></i>
+                                                        <div class="body-text" style="color:#999;">Click to upload banner image</div>
+                                                        <input type="file" id="mainImageFile" accept="image/*" style="display:none;">
+                                                    </div>
+                                                </div>
+                                                <div id="imagePreview" class="img-preview-wrap" style="display:none;">
+                                                    <img id="imagePreviewImg" src="">
+                                                    <button type="button" class="img-remove-btn" onclick="removeMainImage()" title="Remove image">&times;</button>
+                                                </div>
+                                                <div id="mainImageProgress" style="display:none;" class="mt-5">
+                                                    <div style="background:#eee; border-radius:4px; height:6px; overflow:hidden;">
+                                                        <div id="mainImageProgressBar" style="background:#2275fc; height:100%; width:0%; transition: width 0.3s;"></div>
+                                                    </div>
+                                                    <div class="text-tiny mt-5" id="mainImageStatus">Uploading...</div>
+                                                </div>
+                                            </fieldset>
+                                            <fieldset>
+                                                <div class="body-title mb-10">Mobile Banner Image</div>
+                                                <input type="hidden" id="mobileImageUrl">
+                                                <div id="mobileImageUploadArea">
+                                                    <div class="upload-drop-zone" id="mobileImageUpload">
+                                                        <i class="icon-upload-cloud" style="font-size:28px; color:#999; margin-bottom:8px;"></i>
+                                                        <div class="body-text" style="color:#999;">Click to upload mobile image</div>
+                                                        <input type="file" id="mobileImageFile" accept="image/*" style="display:none;">
+                                                    </div>
+                                                </div>
+                                                <div id="mobileImagePreview" class="img-preview-wrap" style="display:none;">
+                                                    <img id="mobileImagePreviewImg" src="">
+                                                    <button type="button" class="img-remove-btn" onclick="removeMobileImage()" title="Remove image">&times;</button>
+                                                </div>
+                                                <div id="mobileImageProgress" style="display:none;" class="mt-5">
+                                                    <div style="background:#eee; border-radius:4px; height:6px; overflow:hidden;">
+                                                        <div id="mobileImageProgressBar" style="background:#2275fc; height:100%; width:0%; transition: width 0.3s;"></div>
+                                                    </div>
+                                                    <div class="text-tiny mt-5" id="mobileImageStatus">Uploading...</div>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+
+                                        <div class="cols mt-20">
+                                            <fieldset>
+                                                <div class="body-title mb-10">Link URL</div>
+                                                <input type="text" id="linkUrl" placeholder="https://example.com/products">
+                                            </fieldset>
+                                            <fieldset>
+                                                <div class="body-title mb-10">Link Target</div>
+                                                <div class="select">
+                                                    <select id="linkTarget">
+                                                        <option value="_self">Same Window (_self)</option>
+                                                        <option value="_blank">New Window (_blank)</option>
+                                                    </select>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+
+                                        <div class="cols mt-20">
+                                            <fieldset>
+                                                <div class="body-title mb-10">Position (Order)</div>
+                                                <input type="number" id="position" min="0" value="0" placeholder="Lower numbers appear first">
+                                            </fieldset>
+                                            <fieldset>
+                                                <div class="body-title mb-10">Page Location</div>
+                                                <div class="select">
+                                                    <select id="pageLocation">
+                                                        <option value="">All Pages</option>
+                                                        <option value="home">Home</option>
+                                                        <option value="shop">Shop</option>
+                                                        <option value="category:bed-linen">Bed Linen</option>
+                                                        <option value="category:dog-food">Dog Food</option>
+                                                    </select>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+
+                                        <div class="cols mt-20">
+                                            <fieldset>
+                                                <div class="body-title mb-10">Start Date</div>
+                                                <input type="datetime-local" id="startDate">
+                                            </fieldset>
+                                            <fieldset>
+                                                <div class="body-title mb-10">End Date</div>
+                                                <input type="datetime-local" id="endDate">
+                                            </fieldset>
+                                        </div>
+
+                                        <fieldset class="mt-20">
+                                            <label><input type="checkbox" id="activeBanner" checked> Active</label>
+                                        </fieldset>
+
+                                        <div class="cols gap10 mt-20">
+                                            <button type="button" class="tf-button w-full" onclick="closeFormSection()">Cancel</button>
+                                            <button type="button" class="tf-button style-1 w-full" onclick="saveBanner()">Save Banner</button>
+                                        </div>
+                                    </form>
+                                </div>
+
                                 <!-- banner-list -->
                                 <div class="wg-box mb-20">
                                     <div class="wg-filter flex items-center justify-between gap10 flex-wrap">
@@ -450,6 +521,11 @@
                                             <li class="product-item gap14"><div class="body-text">Loading banners...</div></li>
                                         </ul>
                                     </div>
+                                    <div class="divider"></div>
+                                    <div class="flex items-center justify-between flex-wrap gap10">
+                                        <div id="banner-entries-info" class="text-tiny"></div>
+                                        <ul id="banner-pagination" class="wg-pagination"></ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -466,107 +542,15 @@
         </div>
     </div>
 
-    <!-- Add/Edit Banner Modal -->
-    <div id="bannerModal" class="modal" style="display: none;">
-        <div class="modal-dialog" style="max-width: 700px;">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 id="modalTitle">Add New Banner</h4>
-                    <button type="button" class="close" onclick="closeModal()">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <form id="bannerForm">
-                        <input type="hidden" id="bannerId">
-
-                        <div class="form-group mb-3">
-                            <label>Title *</label>
-                            <input type="text" id="bannerTitle" class="form-control" required placeholder="e.g., Summer Sale">
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>Description</label>
-                            <textarea id="bannerDescription" class="form-control" rows="2" placeholder="Banner description..."></textarea>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>Banner Type *</label>
-                            <select id="bannerType" class="form-control" required>
-                                <option value="hero">Hero</option>
-                                <option value="category">Category</option>
-                                <option value="promotional">Promotional</option>
-                                <option value="sidebar">Sidebar</option>
-                                <option value="footer">Footer</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>Image URL *</label>
-                            <input type="text" id="imageUrl" class="form-control" required placeholder="https://example.com/banner.jpg">
-                            <div id="imagePreview" style="margin-top: 10px; max-height: 100px; overflow: hidden;"></div>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>Mobile Image URL (Optional)</label>
-                            <input type="text" id="mobileImageUrl" class="form-control" placeholder="https://example.com/banner-mobile.jpg">
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>Link URL (Optional)</label>
-                            <input type="text" id="linkUrl" class="form-control" placeholder="https://example.com/products">
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>Link Target</label>
-                            <select id="linkTarget" class="form-control">
-                                <option value="_self">Same Window (_self)</option>
-                                <option value="_blank">New Window (_blank)</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>Position (Order)</label>
-                            <input type="number" id="position" class="form-control" min="0" value="0" placeholder="Lower numbers appear first">
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>Page Location (Optional)</label>
-                            <select id="pageLocation" class="form-control">
-                                <option value="">All Pages</option>
-                                <option value="home">Home</option>
-                                <option value="shop">Shop</option>
-                                <option value="category:bed-linen">Bed Linen</option>
-                                <option value="category:dog-food">Dog Food</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>Start Date (Optional)</label>
-                            <input type="datetime-local" id="startDate" class="form-control">
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>End Date (Optional)</label>
-                            <input type="datetime-local" id="endDate" class="form-control">
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>
-                                <input type="checkbox" id="activeBanner" checked>
-                                Active
-                            </label>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="tf-button" onclick="closeModal()">Cancel</button>
-                    <button type="button" class="tf-button btn-primary" onclick="saveBanner()">Save Banner</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <script>
+        // Cloudinary config
+        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dknjr0tj2/upload";
+        const UPLOAD_PRESET = "unsigned_products";
+
         let allBanners = [];
+        let bannerCurrentPage = 1;
+        const bannerPageSize = 10;
 
         // Load admin data
         async function loadAdminData() {
@@ -604,16 +588,27 @@
             }
         }
 
-        // Render banners table
+        // Render banners table with pagination
         function renderBannersTable() {
             const list = document.getElementById('bannersList');
+            const entriesInfo = document.getElementById('banner-entries-info');
+            const pagination = document.getElementById('banner-pagination');
 
             if (allBanners.length === 0) {
                 list.innerHTML = '<li class="product-item gap14"><div class="body-text">No banners found</div></li>';
+                entriesInfo.textContent = '';
+                pagination.innerHTML = '';
                 return;
             }
 
-            list.innerHTML = allBanners.map(banner => {
+            const total = allBanners.length;
+            const totalPages = Math.ceil(total / bannerPageSize);
+            if (bannerCurrentPage > totalPages) bannerCurrentPage = totalPages;
+            const start = (bannerCurrentPage - 1) * bannerPageSize;
+            const end = Math.min(bannerCurrentPage * bannerPageSize, total);
+            const pageBanners = allBanners.slice(start, end);
+
+            list.innerHTML = pageBanners.map(banner => {
                 const statusClass = banner.active ? 'success' : 'warning';
                 const statusText = banner.active ? 'Active' : 'Inactive';
 
@@ -621,7 +616,7 @@
                     <li class="product-item gap14" style="align-items: center;">
                         <div style="flex: 0 0 100px;">
                             <img src="${banner.image_url}" alt="${banner.title}"
-                                 style="max-width: 100px; max-height: 50px; object-fit: cover;">
+                                 style="max-width: 100px; max-height: 50px; object-fit: cover; border-radius: 4px;">
                         </div>
                         <div style="flex: 1;"><strong>${banner.title || 'N/A'}</strong></div>
                         <div style="flex: 1;">${banner.banner_type}</div>
@@ -631,16 +626,187 @@
                             ${banner.start_date ? formatDate(banner.start_date) : 'N/A'}
                             ${banner.end_date ? ' to ' + formatDate(banner.end_date) : ''}
                         </div>
-                        <div style="flex: 1;"><span class="badge badge-${statusClass}">${statusText}</span></div>
-                        <div style="flex: 0 0 200px; display: flex; gap: 5px;">
-                            <button class="btn btn-sm btn-primary" onclick="editBanner(${banner.id})">Edit</button>
-                            <button class="btn btn-sm btn-info" onclick="previewBanner(${banner.id})">👁️</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteBanner(${banner.id})">Delete</button>
+                        <div style="flex: 1;"><span class="block-available ${statusClass === 'success' ? '' : 'warning'}">${statusText}</span></div>
+                        <div class="list-icon-function">
+                            <div class="item edit" onclick="editBanner(${banner.id})"><i class="icon-edit-3"></i></div>
+                            <div class="item eye" onclick="previewBanner(${banner.id})"><i class="icon-eye"></i></div>
+                            <div class="item trash" onclick="deleteBanner(${banner.id})"><i class="icon-trash-2"></i></div>
                         </div>
                     </li>
                 `;
             }).join('');
+
+            // Entries info
+            entriesInfo.textContent = `Showing ${start + 1}\u2013${end} of ${total} entries`;
+
+            // Pagination
+            pagination.innerHTML = '';
+            if (totalPages <= 1) return;
+            const prevLi = document.createElement('li');
+            prevLi.innerHTML = '<a href="#"><i class="icon-chevron-left"></i></a>';
+            if (bannerCurrentPage === 1) prevLi.classList.add('disabled');
+            prevLi.addEventListener('click', e => { e.preventDefault(); if (bannerCurrentPage > 1) { bannerCurrentPage--; renderBannersTable(); } });
+            pagination.appendChild(prevLi);
+            for (let i = 1; i <= totalPages; i++) {
+                const pLi = document.createElement('li');
+                pLi.innerHTML = `<a href="#">${i}</a>`;
+                if (i === bannerCurrentPage) pLi.classList.add('active');
+                pLi.addEventListener('click', e => { e.preventDefault(); bannerCurrentPage = i; renderBannersTable(); });
+                pagination.appendChild(pLi);
+            }
+            const nextLi = document.createElement('li');
+            nextLi.innerHTML = '<a href="#"><i class="icon-chevron-right"></i></a>';
+            if (bannerCurrentPage === totalPages) nextLi.classList.add('disabled');
+            nextLi.addEventListener('click', e => { e.preventDefault(); if (bannerCurrentPage < totalPages) { bannerCurrentPage++; renderBannersTable(); } });
+            pagination.appendChild(nextLi);
         }
+
+        // --- Cloudinary Upload Helper ---
+        async function uploadToCloudinary(file, progressBarId, statusId) {
+            if (!file) return null;
+            const progressBar = document.getElementById(progressBarId);
+            const statusEl = document.getElementById(statusId);
+
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("upload_preset", UPLOAD_PRESET);
+
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", CLOUDINARY_URL);
+
+                xhr.upload.addEventListener("progress", (e) => {
+                    if (e.lengthComputable && progressBar) {
+                        const pct = Math.round((e.loaded / e.total) * 100);
+                        progressBar.style.width = pct + '%';
+                        if (statusEl) statusEl.textContent = `Uploading... ${pct}%`;
+                    }
+                });
+
+                xhr.addEventListener("load", () => {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        const data = JSON.parse(xhr.responseText);
+                        if (statusEl) statusEl.textContent = 'Upload complete!';
+                        resolve(data.secure_url);
+                    } else {
+                        if (statusEl) statusEl.textContent = 'Upload failed!';
+                        reject(new Error('Upload failed: ' + xhr.statusText));
+                    }
+                });
+
+                xhr.addEventListener("error", () => {
+                    if (statusEl) statusEl.textContent = 'Upload error!';
+                    reject(new Error('Network error during upload'));
+                });
+
+                xhr.send(formData);
+            });
+        }
+
+        // Extract Cloudinary public_id from URL
+        function getCloudinaryPublicId(url) {
+            if (!url || !url.includes('cloudinary')) return null;
+            try {
+                const parts = url.split('/upload/');
+                if (parts.length < 2) return null;
+                let path = parts[1];
+                // Remove version prefix (e.g., v1234567890/)
+                path = path.replace(/^v\d+\//, '');
+                // Remove file extension
+                path = path.replace(/\.[^/.]+$/, '');
+                return path;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // Delete image from Cloudinary
+        async function deleteFromCloudinary(url) {
+            const publicId = getCloudinaryPublicId(url);
+            if (!publicId) return;
+            try {
+                await fetch('/api/admin/cloudinary/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ public_id: publicId })
+                });
+            } catch (e) {
+                console.error('Failed to delete image from Cloudinary:', e);
+            }
+        }
+
+        // --- Image Preview Helpers ---
+        function showImagePreview(url, previewId, previewImgId, uploadAreaId) {
+            document.getElementById(previewImgId).src = url;
+            document.getElementById(previewId).style.display = 'block';
+            document.getElementById(uploadAreaId).style.display = 'none';
+        }
+
+        function hideImagePreview(previewId, uploadAreaId, hiddenInputId, progressId) {
+            document.getElementById(previewId).style.display = 'none';
+            document.getElementById(uploadAreaId).style.display = 'block';
+            document.getElementById(hiddenInputId).value = '';
+            if (progressId) {
+                document.getElementById(progressId).style.display = 'none';
+            }
+        }
+
+        // Remove main image
+        async function removeMainImage() {
+            const url = document.getElementById('imageUrl').value;
+            if (url) await deleteFromCloudinary(url);
+            hideImagePreview('imagePreview', 'imageUploadArea', 'imageUrl', 'mainImageProgress');
+        }
+
+        // Remove mobile image
+        async function removeMobileImage() {
+            const url = document.getElementById('mobileImageUrl').value;
+            if (url) await deleteFromCloudinary(url);
+            hideImagePreview('mobileImagePreview', 'mobileImageUploadArea', 'mobileImageUrl', 'mobileImageProgress');
+        }
+
+        // --- File Input Handlers ---
+        document.getElementById('mainImageUpload').addEventListener('click', () => {
+            document.getElementById('mainImageFile').click();
+        });
+
+        document.getElementById('mobileImageUpload').addEventListener('click', () => {
+            document.getElementById('mobileImageFile').click();
+        });
+
+        document.getElementById('mainImageFile').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            document.getElementById('mainImageProgress').style.display = 'block';
+            document.getElementById('mainImageProgressBar').style.width = '0%';
+            try {
+                const url = await uploadToCloudinary(file, 'mainImageProgressBar', 'mainImageStatus');
+                if (url) {
+                    document.getElementById('imageUrl').value = url;
+                    showImagePreview(url, 'imagePreview', 'imagePreviewImg', 'imageUploadArea');
+                }
+            } catch (err) {
+                alert('Failed to upload banner image: ' + err.message);
+            }
+            e.target.value = '';
+        });
+
+        document.getElementById('mobileImageFile').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            document.getElementById('mobileImageProgress').style.display = 'block';
+            document.getElementById('mobileImageProgressBar').style.width = '0%';
+            try {
+                const url = await uploadToCloudinary(file, 'mobileImageProgressBar', 'mobileImageStatus');
+                if (url) {
+                    document.getElementById('mobileImageUrl').value = url;
+                    showImagePreview(url, 'mobileImagePreview', 'mobileImagePreviewImg', 'mobileImageUploadArea');
+                }
+            } catch (err) {
+                alert('Failed to upload mobile image: ' + err.message);
+            }
+            e.target.value = '';
+        });
 
         // Show add modal
         function showAddModal() {
@@ -648,7 +814,11 @@
             document.getElementById('bannerForm').reset();
             document.getElementById('bannerId').value = '';
             document.getElementById('activeBanner').checked = true;
-            document.getElementById('bannerModal').style.display = 'block';
+            // Reset image previews
+            hideImagePreview('imagePreview', 'imageUploadArea', 'imageUrl', 'mainImageProgress');
+            hideImagePreview('mobileImagePreview', 'mobileImageUploadArea', 'mobileImageUrl', 'mobileImageProgress');
+            document.getElementById('bannerFormSection').style.display = 'block';
+            document.getElementById('bannerFormSection').scrollIntoView({ behavior: 'smooth' });
         }
 
         // Edit banner
@@ -673,7 +843,20 @@
             document.getElementById('endDate').value = formatDateTimeLocal(banner.end_date);
             document.getElementById('activeBanner').checked = banner.active;
 
-            document.getElementById('bannerModal').style.display = 'block';
+            // Show image previews if images exist
+            if (banner.image_url) {
+                showImagePreview(banner.image_url, 'imagePreview', 'imagePreviewImg', 'imageUploadArea');
+            } else {
+                hideImagePreview('imagePreview', 'imageUploadArea', 'imageUrl', 'mainImageProgress');
+            }
+            if (banner.mobile_image_url) {
+                showImagePreview(banner.mobile_image_url, 'mobileImagePreview', 'mobileImagePreviewImg', 'mobileImageUploadArea');
+            } else {
+                hideImagePreview('mobileImagePreview', 'mobileImageUploadArea', 'mobileImageUrl', 'mobileImageProgress');
+            }
+
+            document.getElementById('bannerFormSection').style.display = 'block';
+            document.getElementById('bannerFormSection').scrollIntoView({ behavior: 'smooth' });
         }
 
         // Preview banner
@@ -689,11 +872,14 @@
             const id = document.getElementById('bannerId').value;
             const isEdit = !!id;
 
+            const imageUrlVal = document.getElementById('imageUrl').value;
+            console.log('imageUrl hidden input value:', imageUrlVal);
+
             const data = {
                 title: document.getElementById('bannerTitle').value,
                 description: document.getElementById('bannerDescription').value,
                 banner_type: document.getElementById('bannerType').value,
-                image_url: document.getElementById('imageUrl').value,
+                image_url: imageUrlVal,
                 mobile_image_url: document.getElementById('mobileImageUrl').value || null,
                 link_url: document.getElementById('linkUrl').value || null,
                 link_target: document.getElementById('linkTarget').value,
@@ -704,8 +890,12 @@
                 active: document.getElementById('activeBanner').checked
             };
 
-            if (!data.title || !data.banner_type || !data.image_url) {
-                alert('Title, Banner Type, and Image URL are required');
+            if (!data.title) {
+                alert('Please enter a banner title');
+                return;
+            }
+            if (!data.image_url) {
+                alert('Please upload a banner image first');
                 return;
             }
 
@@ -713,7 +903,7 @@
                 const url = isEdit ? `/api/admin/banners/${id}` : '/api/admin/banners';
                 const method = isEdit ? 'PUT' : 'POST';
 
-                console.log('Saving banner:', data);
+                console.log('Saving banner:', JSON.stringify(data, null, 2));
 
                 const res = await fetch(url, {
                     method: method,
@@ -721,26 +911,37 @@
                     body: JSON.stringify(data)
                 });
 
-                const result = await res.json();
+                const text = await res.text();
+                console.log('Server response:', res.status, text);
+
+                let result;
+                try {
+                    result = JSON.parse(text);
+                } catch (e) {
+                    throw new Error('Server returned invalid response: ' + text.substring(0, 200));
+                }
 
                 if (result.success) {
                     alert(isEdit ? 'Banner updated successfully' : 'Banner created successfully');
-                    closeModal();
+                    closeFormSection();
                     await loadBanners();
                 } else {
-                    alert(result.message || 'Failed to save banner');
+                    alert('Failed to save: ' + (result.message || result.error || 'Unknown error'));
                 }
             } catch (error) {
                 console.error('Error saving banner:', error);
-                alert('Failed to save banner');
+                alert('Failed to save banner: ' + error.message);
             }
         }
 
-        // Delete banner
+        // Delete banner (also removes images from Cloudinary)
         async function deleteBanner(id) {
-            if (!confirm('Are you sure you want to delete this banner?')) return;
+            if (!confirm('Are you sure you want to delete this banner? This will also remove the uploaded images.')) return;
 
             try {
+                // Find the banner to get image URLs before deleting
+                const banner = allBanners.find(b => b.id === id);
+
                 console.log('Deleting banner:', id);
                 const res = await fetch(`/api/admin/banners/${id}`, {
                     method: 'DELETE'
@@ -749,6 +950,11 @@
                 const result = await res.json();
 
                 if (result.success) {
+                    // Clean up Cloudinary images
+                    if (banner) {
+                        if (banner.image_url) await deleteFromCloudinary(banner.image_url);
+                        if (banner.mobile_image_url) await deleteFromCloudinary(banner.mobile_image_url);
+                    }
                     alert('Banner deleted successfully');
                     await loadBanners();
                 } else {
@@ -760,21 +966,13 @@
             }
         }
 
-        // Close modal
-        function closeModal() {
-            document.getElementById('bannerModal').style.display = 'none';
+        // Close form section
+        function closeFormSection() {
+            document.getElementById('bannerFormSection').style.display = 'none';
         }
-
-        // Image preview
-        document.getElementById('imageUrl').addEventListener('input', function() {
-            const url = this.value;
-            const preview = document.getElementById('imagePreview');
-            if (url) {
-                preview.innerHTML = `<img src="${url}" style="max-width: 200px; max-height: 100px; object-fit: contain; border: 1px solid #ddd;">`;
-            } else {
-                preview.innerHTML = '';
-            }
-        });
+        function closeModal() {
+            closeFormSection();
+        }
 
         // Format date for datetime-local input
         function formatDateTimeLocal(dateString) {
