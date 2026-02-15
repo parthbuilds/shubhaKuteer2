@@ -630,6 +630,98 @@ export default async function handler(req, res) {
 
 
 
+        // Public banners endpoint (no auth required)
+        if (pathname === '/api/banners/active' && req.method === 'GET') {
+            try {
+                const pool = await import("../backend/utils/db.js");
+                const [rows] = await pool.default.query(`
+                    SELECT id, title, description, banner_type, image_url, mobile_image_url,
+                        link_url, link_target, position, page_location, start_date, end_date
+                    FROM banners
+                    WHERE active = 1
+                        AND (start_date IS NULL OR start_date <= NOW())
+                        AND (end_date IS NULL OR end_date >= NOW())
+                    ORDER BY page_location, position ASC
+                `);
+                return res.status(200).json({ success: true, banners: rows });
+            } catch (error) {
+                console.error("Public banners error:", error);
+                return res.status(500).json({ success: false, message: "Failed to load banners" });
+            }
+        }
+
+        // Public coupon validation endpoint (no auth required)
+        if (pathname === '/api/coupons/validate' && req.method === 'POST') {
+            try {
+                const pool = await import("../backend/utils/db.js");
+                const { code, cart_total } = req.body;
+
+                if (!code) {
+                    return res.status(400).json({ success: false, message: 'Please enter a coupon code' });
+                }
+
+                const [rows] = await pool.default.query(`
+                    SELECT * FROM coupons WHERE code = ? AND active = 1 LIMIT 1
+                `, [code.toUpperCase()]);
+
+                if (rows.length === 0) {
+                    return res.status(404).json({ success: false, message: 'Invalid coupon code' });
+                }
+
+                const coupon = rows[0];
+
+                // Check date validity
+                const now = new Date();
+                if (coupon.start_date) {
+                    const start = new Date(coupon.start_date);
+                    if (now < start) return res.status(400).json({ success: false, message: 'This coupon is not yet active' });
+                }
+                if (coupon.end_date) {
+                    const end = new Date(coupon.end_date);
+                    if (now > end) return res.status(400).json({ success: false, message: 'This coupon has expired' });
+                }
+
+                // Check usage limit
+                if (coupon.usage_limit !== null && coupon.usage_count >= coupon.usage_limit) {
+                    return res.status(400).json({ success: false, message: 'This coupon has reached its usage limit' });
+                }
+
+                // Check minimum order value
+                const cartAmount = parseFloat(cart_total) || 0;
+                if (coupon.min_order_value && cartAmount < parseFloat(coupon.min_order_value)) {
+                    return res.status(400).json({ success: false, message: `Minimum order value of ₹${coupon.min_order_value} required` });
+                }
+
+                // Calculate discount
+                let discount = 0;
+                if (coupon.discount_type === 'percentage') {
+                    discount = (cartAmount * parseFloat(coupon.discount_value)) / 100;
+                    if (coupon.max_discount_amount) {
+                        discount = Math.min(discount, parseFloat(coupon.max_discount_amount));
+                    }
+                } else if (coupon.discount_type === 'fixed_amount') {
+                    discount = parseFloat(coupon.discount_value);
+                }
+
+                discount = Math.min(discount, cartAmount); // Can't discount more than cart total
+
+                return res.status(200).json({
+                    success: true,
+                    message: 'Coupon applied successfully!',
+                    coupon: {
+                        code: coupon.code,
+                        discount_type: coupon.discount_type,
+                        discount_value: parseFloat(coupon.discount_value),
+                        discount_amount: Math.round(discount * 100) / 100,
+                        free_shipping: coupon.discount_type === 'free_shipping' || coupon.free_shipping
+                    }
+                });
+            } catch (error) {
+                console.error("Coupon validation error:", error);
+                return res.status(500).json({ success: false, message: "Failed to validate coupon" });
+            }
+        }
+
         // Banners routes
         if (pathname.startsWith('/api/admin/banners')) {
             try {
@@ -640,8 +732,25 @@ export default async function handler(req, res) {
                     const [rows] = await pool.default.query(`
                         SELECT * FROM banners ORDER BY position ASC, created_at DESC
                     `);
-                    return res.status(200).json({ success: true, banners: rows });
+                    // With dateStrings:true, dates come as 'YYYY-MM-DD HH:mm:ss' strings
+                    // Convert to 'YYYY-MM-DDTHH:mm' for datetime-local inputs
+                    const fmtDate = (d) => d ? d.slice(0, 16).replace(' ', 'T') : null;
+                    const banners = rows.map(b => ({
+                        ...b,
+                        start_date: fmtDate(b.start_date),
+                        end_date: fmtDate(b.end_date),
+                    }));
+                    return res.status(200).json({ success: true, banners });
                 }
+
+                // Helper: normalize datetime string to MySQL format (no timezone conversion)
+                const normalizeDate = (d) => {
+                    if (!d) return null;
+                    // Convert 'YYYY-MM-DDTHH:mm' or 'YYYY-MM-DDTHH:mm:ss' to 'YYYY-MM-DD HH:mm:ss'
+                    let s = String(d).replace('T', ' ');
+                    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(s)) s += ':00';
+                    return s;
+                };
 
                 // POST new banner
                 if (pathname === '/api/admin/banners' && req.method === 'POST') {
@@ -662,7 +771,7 @@ export default async function handler(req, res) {
                     `, [
                         title, description || null, banner_type, image_url, mobile_image_url || null,
                         link_url || null, link_target || '_self', parseInt(position) || 0,
-                        page_location || null, start_date || null, end_date || null,
+                        page_location || null, normalizeDate(start_date), normalizeDate(end_date),
                         active !== undefined ? (active ? 1 : 0) : 1
                     ]);
 
@@ -694,7 +803,7 @@ export default async function handler(req, res) {
                     `, [
                         title, description || null, banner_type, image_url, mobile_image_url || null,
                         link_url || null, link_target || '_self', parseInt(position) || 0,
-                        page_location || null, start_date || null, end_date || null,
+                        page_location || null, normalizeDate(start_date), normalizeDate(end_date),
                         active !== undefined ? (active ? 1 : 0) : 1, id
                     ]);
 
@@ -705,13 +814,35 @@ export default async function handler(req, res) {
                     return res.status(200).json({ success: true, message: 'Banner updated successfully' });
                 }
 
-                // DELETE banner
+                // DELETE banner (with server-side Cloudinary cleanup)
                 if (pathname.startsWith('/api/admin/banners/') && req.method === 'DELETE') {
                     const id = pathname.split('/').pop();
+
+                    // Fetch banner images before deleting
+                    const [bannerRows] = await pool.default.query("SELECT image_url, mobile_image_url FROM banners WHERE id = ?", [id]);
+                    if (bannerRows.length === 0) {
+                        return res.status(404).json({ success: false, message: 'Banner not found' });
+                    }
+
                     const [result] = await pool.default.query("DELETE FROM banners WHERE id = ?", [id]);
 
-                    if (result.affectedRows === 0) {
-                        return res.status(404).json({ success: false, message: 'Banner not found' });
+                    // Delete images from Cloudinary server-side
+                    try {
+                        const cloudinary = await import("../backend/utils/cloudinary.js");
+                        const getPublicId = (url) => {
+                            if (!url || !url.includes('cloudinary')) return null;
+                            const parts = url.split('/upload/');
+                            if (parts.length < 2) return null;
+                            let path = parts[1].replace(/^v\d+\//, '').replace(/\.[^/.]+$/, '');
+                            return path;
+                        };
+                        const img = bannerRows[0];
+                        const pid1 = getPublicId(img.image_url);
+                        const pid2 = getPublicId(img.mobile_image_url);
+                        if (pid1) await cloudinary.default.uploader.destroy(pid1).catch(e => console.error('Cloudinary delete error:', e));
+                        if (pid2) await cloudinary.default.uploader.destroy(pid2).catch(e => console.error('Cloudinary delete error:', e));
+                    } catch (e) {
+                        console.error('Cloudinary cleanup failed (non-fatal):', e.message);
                     }
 
                     return res.status(200).json({ success: true, message: 'Banner deleted successfully' });
@@ -747,12 +878,26 @@ export default async function handler(req, res) {
             try {
                 const pool = await import("../backend/utils/db.js");
 
+                // Helper: normalize datetime string to MySQL format
+                const normDate = (d) => {
+                    if (!d) return null;
+                    let s = String(d).replace('T', ' ');
+                    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(s)) s += ':00';
+                    return s;
+                };
+                const fmtDate = (d) => d ? d.slice(0, 16).replace(' ', 'T') : null;
+
                 // GET all coupons
                 if (pathname === '/api/admin/coupons' && req.method === 'GET') {
                     const [rows] = await pool.default.query(`
                         SELECT * FROM coupons ORDER BY created_at DESC
                     `);
-                    return res.status(200).json({ success: true, coupons: rows });
+                    const coupons = rows.map(c => ({
+                        ...c,
+                        start_date: fmtDate(c.start_date),
+                        end_date: fmtDate(c.end_date),
+                    }));
+                    return res.status(200).json({ success: true, coupons });
                 }
 
                 // POST new coupon
@@ -779,7 +924,7 @@ export default async function handler(req, res) {
                         max_discount_amount != null ? parseFloat(max_discount_amount) : null,
                         usage_limit != null ? parseInt(usage_limit) : null,
                         parseInt(user_limit) || 1,
-                        start_date || null, end_date || null,
+                        normDate(start_date), normDate(end_date),
                         active !== undefined ? (active ? 1 : 0) : 1
                     ]);
 
@@ -815,7 +960,7 @@ export default async function handler(req, res) {
                         max_discount_amount != null ? parseFloat(max_discount_amount) : null,
                         usage_limit != null ? parseInt(usage_limit) : null,
                         parseInt(user_limit) || 1,
-                        start_date || null, end_date || null,
+                        normDate(start_date), normDate(end_date),
                         active !== undefined ? (active ? 1 : 0) : 1, id
                     ]);
 

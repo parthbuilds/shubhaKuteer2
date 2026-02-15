@@ -443,8 +443,8 @@
                                                 <div class="body-title mb-10">Banner Type <span class="tf-color-1">*</span></div>
                                                 <div class="select">
                                                     <select id="bannerType" required>
-                                                        <option value="hero">Hero (Main Slider)</option>
-                                                        <option value="promotional">Promotional (Offer Cards)</option>
+                                                        <option value="hero">Hero — Full-width Slider (Home top)</option>
+                                                        <option value="promotional">Promotional — Offer Cards (3 cards below collections)</option>
                                                         <option value="category">Category Banner</option>
                                                         <option value="sidebar">Sidebar</option>
                                                         <option value="footer">Footer</option>
@@ -471,8 +471,8 @@
                                         </div>
 
                                         <fieldset class="mt-20">
-                                            <div class="body-title mb-10">Description</div>
-                                            <textarea id="bannerDescription" placeholder="Banner description..."></textarea>
+                                                <div class="body-title mb-10">Description <span style="font-weight:400;color:#999;font-size:12px;">(shown as subtitle on hero slides)</span></div>
+                                            <textarea id="bannerDescription" placeholder="e.g., Sale! Up To 30% Off!"></textarea>
                                         </fieldset>
 
                                         <div class="cols mt-20">
@@ -522,8 +522,8 @@
 
                                         <div class="cols mt-20">
                                             <fieldset>
-                                                <div class="body-title mb-10">Link URL</div>
-                                                <input type="text" id="linkUrl" placeholder="e.g., /shop.html?cat=Bedsheets">
+                                                <div class="body-title mb-10">Link URL <span style="font-weight:400;color:#999;font-size:12px;">("Shop Now" button destination)</span></div>
+                                                <input type="text" id="linkUrl" placeholder="e.g., shop.html?cat=Bedsheets">
                                             </fieldset>
                                             <fieldset>
                                                 <div class="body-title mb-10">Link Target</div>
@@ -538,11 +538,11 @@
 
                                         <div class="cols mt-20">
                                             <fieldset>
-                                                <div class="body-title mb-10">Start Date</div>
+                                                <div class="body-title mb-10">Start Date <span style="font-weight:400;color:#999;font-size:12px;">(leave empty = show immediately)</span></div>
                                                 <input type="datetime-local" id="startDate">
                                             </fieldset>
                                             <fieldset>
-                                                <div class="body-title mb-10">End Date</div>
+                                                <div class="body-title mb-10">End Date <span style="font-weight:400;color:#999;font-size:12px;">(leave empty = no expiry)</span></div>
                                                 <input type="datetime-local" id="endDate">
                                             </fieldset>
                                         </div>
@@ -608,7 +608,7 @@
 
         // Page location config
         const PAGE_SECTIONS = {
-            home: { label: 'Home Page Banners', desc: 'Banners shown on the home page (hero sliders, promotional cards, etc.)' },
+            home: { label: 'Home Page Banners', desc: 'Hero = full-width slider at the top (3 slides). Promotional = the 3 offer cards below collections.' },
             shop: { label: 'Shop Page Banners', desc: 'Banners shown on the shop/product listing page' },
             '':   { label: 'All Pages (Global)', desc: 'Banners shown across all pages of the website' }
         };
@@ -1029,7 +1029,11 @@
         // Date helpers
         function formatDateTimeLocal(dateString) {
             if (!dateString) return '';
+            // If already in YYYY-MM-DDTHH:mm format (from our API), use as-is
+            if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(dateString)) return dateString;
+            // Otherwise parse and format (fallback)
             const d = new Date(dateString);
+            if (isNaN(d.getTime())) return '';
             return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}T${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
         }
         function formatDate(dateString) {

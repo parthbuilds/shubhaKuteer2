@@ -827,7 +827,7 @@
         class="slider-block style-two bg-linear 2xl:h-[800px] xl:h-[740px] lg:h-[680px] md:h-[580px] sm:h-[500px] h-[420px] w-full">
         <div class="slider-main h-full w-full">
             <div class="swiper swiper-slider h-full relative">
-                <div class="swiper-wrapper">
+                <div class="swiper-wrapper" id="heroSliderWrapper">
                     <div class="swiper-slide">
                         <div class="slider-item h-full w-full relative overflow-hidden">
                             <div class="container w-full h-full flex items-center">
@@ -1003,7 +1003,7 @@
     <!-- Featured Product card Section -->
     <div class="banner-block md:pt-20 md:pb-20 pt-10 pb-10 bg-surface">
         <div class="container">
-            <div class="list-banner grid lg:grid-cols-3 sm:grid-cols-2 lg:gap-[30px] gap-[20px]">
+            <div class="list-banner grid lg:grid-cols-3 sm:grid-cols-2 lg:gap-[30px] gap-[20px]" id="offerBannersGrid">
                 <a href="shop.html?cat=Bags%20and%20Kits" class="banner-item relative block duration-500">
                     <div class="banner-img w-full rounded-2xl overflow-hidden">
                         <img src="./assets/images/card/offer-banner-1.png" class="w-full duration-500" alt="img" />
@@ -2564,6 +2564,70 @@
 
     </script>
     <script src="./assets/js/search.js"></script>
+    <script>
+        // Dynamic banner loading from database
+        (async function loadDynamicBanners() {
+            try {
+                const res = await fetch('/api/banners/active');
+                if (!res.ok) return;
+                const data = await res.json();
+                if (!data.success || !data.banners || data.banners.length === 0) return;
+
+                const homeBanners = data.banners.filter(b => b.page_location === 'home');
+                const heroBanners = homeBanners.filter(b => b.banner_type === 'hero');
+                const promoBanners = homeBanners.filter(b => b.banner_type === 'promotional');
+
+                // Replace hero slider if we have hero banners
+                if (heroBanners.length > 0) {
+                    const wrapper = document.getElementById('heroSliderWrapper');
+                    if (wrapper) {
+                        wrapper.innerHTML = heroBanners.map(b => `
+                            <div class="swiper-slide">
+                                <div class="slider-item h-full w-full relative overflow-hidden">
+                                    <div class="container w-full h-full flex items-center">
+                                        <div class="text-content sm:w-1/2 w-2/3">
+                                            <div class="text-sub-display">${b.description || ''}</div>
+                                            <div class="text-display md:mt-5 mt-2">${b.title}</div>
+                                            ${b.link_url ? `<a href="${b.link_url}" target="${b.link_target || '_self'}" class="button-main md:mt-8 mt-3">Shop Now</a>` : ''}
+                                        </div>
+                                        <div class="sub-img absolute left-0 top-0 w-full h-full z-[-1]">
+                                            <img src="${b.image_url}" alt="${b.title}" class="w-full h-full object-cover" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('');
+                        // Re-init swiper if available
+                        const swiperEl = wrapper.closest('.swiper');
+                        if (swiperEl && swiperEl.swiper) {
+                            swiperEl.swiper.update();
+                        }
+                    }
+                }
+
+                // Replace offer banners if we have promotional banners
+                if (promoBanners.length > 0) {
+                    const grid = document.getElementById('offerBannersGrid');
+                    if (grid) {
+                        grid.innerHTML = promoBanners.map((b, i) => `
+                            <a href="${b.link_url || '#'}" target="${b.link_target || '_self'}"
+                               class="banner-item relative block duration-500${i >= 2 ? ' max-lg:hidden' : ''}">
+                                <div class="banner-img w-full rounded-2xl overflow-hidden">
+                                    <img src="${b.image_url}" class="w-full duration-500" alt="${b.title}" />
+                                </div>
+                                <div class="banner-content absolute left-[30px] bottom-[30px]">
+                                    <div class="heading4">${b.title}</div>
+                                    <div class="text-black relative inline-block pb-1 border-b-2 border-black duration-500 mt-14">Shop Now</div>
+                                </div>
+                            </a>
+                        `).join('');
+                    }
+                }
+            } catch (e) {
+                console.log('Banner load skipped:', e.message);
+            }
+        })();
+    </script>
 </body>
 
 </html>

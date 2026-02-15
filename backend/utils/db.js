@@ -37,6 +37,7 @@ const pool = mysql.createPool({
   acquireTimeout: 60000,
   timeout: 60000,
   reconnect: true,
+  dateStrings: true, // Return dates as strings, not JS Date objects (prevents timezone drift)
 });
 
 // Connection pool monitoring

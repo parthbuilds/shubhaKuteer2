@@ -757,6 +757,15 @@
                         <div class="checkout-block">
                             <div class="heading5 pb-3">Your Order</div>
                             <div class="list-product-checkout"></div> <!-- This should be targeted -->
+                            <div class="coupon-apply-block py-4 border-b border-line" id="checkoutCouponBlock">
+                                <div class="flex gap-2">
+                                    <input type="text" id="couponCodeInput" placeholder="Enter coupon code"
+                                        class="border-line px-4 py-2 rounded-lg flex-1 text-sm" style="border:1px solid #e5e5e5;" />
+                                    <button type="button" id="applyCouponBtn"
+                                        class="button-main px-5 py-2 text-sm rounded-lg" style="white-space:nowrap;">Apply</button>
+                                </div>
+                                <div id="couponMsg" class="text-xs mt-2" style="display:none;"></div>
+                            </div>
                             <div class="discount-block py-5 flex justify-between border-b border-line">
                                 <div class="text-title">Discounts</div>
                                 <div class="text-title">-₹<span class="discount">0</span><span>.00</span></div>
@@ -1914,6 +1923,101 @@
                     </div>
                 </div>
             </div>
+            <script>
+                // --- Coupon Apply Logic ---
+                let appliedCoupon = null;
+
+                document.addEventListener('DOMContentLoaded', () => {
+                    const applyBtn = document.getElementById('applyCouponBtn');
+                    const codeInput = document.getElementById('couponCodeInput');
+                    const msgEl = document.getElementById('couponMsg');
+
+                    if (applyBtn && codeInput) {
+                        applyBtn.addEventListener('click', async () => {
+                            const code = codeInput.value.trim();
+                            if (!code) { showCouponMsg('Please enter a coupon code', false); return; }
+
+                            // If already applied, remove it
+                            if (appliedCoupon) {
+                                appliedCoupon = null;
+                                codeInput.value = '';
+                                codeInput.disabled = false;
+                                applyBtn.textContent = 'Apply';
+                                applyBtn.style.background = '';
+                                showCouponMsg('', false);
+                                updateDiscountDisplay(0);
+                                return;
+                            }
+
+                            // Get cart subtotal
+                            let cartStore = localStorage.getItem('cartStore');
+                            cartStore = cartStore ? JSON.parse(cartStore) : [];
+                            let subtotal = 0;
+                            cartStore.forEach(p => { subtotal += (p.price || 0) * (p.quantityPurchase || 1); });
+
+                            applyBtn.textContent = 'Checking...';
+                            applyBtn.disabled = true;
+
+                            try {
+                                const res = await fetch('/api/coupons/validate', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ code, cart_total: subtotal })
+                                });
+                                const data = await res.json();
+                                if (data.success) {
+                                    appliedCoupon = data.coupon;
+                                    updateDiscountDisplay(data.coupon.discount_amount);
+                                    applyBtn.textContent = 'Remove';
+                                    applyBtn.style.background = '#22c55e';
+                                    codeInput.disabled = true;
+                                    showCouponMsg('✓ ' + data.message + ' — You save ₹' + data.coupon.discount_amount, true);
+                                } else {
+                                    showCouponMsg(data.message || 'Invalid coupon', false);
+                                    applyBtn.textContent = 'Apply';
+                                }
+                            } catch (e) {
+                                showCouponMsg('Failed to validate coupon', false);
+                                applyBtn.textContent = 'Apply';
+                            }
+                            applyBtn.disabled = false;
+                        });
+                    }
+
+                    function showCouponMsg(text, isSuccess) {
+                        if (!msgEl) return;
+                        if (!text) { msgEl.style.display = 'none'; return; }
+                        msgEl.style.display = 'block';
+                        msgEl.style.color = isSuccess ? '#22c55e' : '#ef4444';
+                        msgEl.textContent = text;
+                    }
+                });
+
+                function updateDiscountDisplay(discountAmount) {
+                    const discountEl = document.querySelector('.discount-block .discount');
+                    if (discountEl) {
+                        const whole = Math.floor(discountAmount);
+                        const dec = Math.round((discountAmount - whole) * 100);
+                        discountEl.textContent = whole;
+                        const decEl = discountEl.nextElementSibling;
+                        if (decEl) decEl.textContent = '.' + String(dec).padStart(2, '0');
+                    }
+
+                    // Recalculate total with discount
+                    let cartStore = localStorage.getItem('cartStore');
+                    cartStore = cartStore ? JSON.parse(cartStore) : [];
+                    let cartTotal = 0;
+                    cartStore.forEach(p => { cartTotal += (p.price || 0) * (p.quantityPurchase || 1); });
+
+                    const SHIPPING_THRESHOLD = 2000;
+                    const FLAT_RATE = 100;
+                    let shipping = cartTotal >= SHIPPING_THRESHOLD ? 0 : FLAT_RATE;
+                    const grandTotal = cartTotal - discountAmount + shipping;
+
+                    const totalEls = document.querySelectorAll('.total-cart-block .total-cart, .total-cart');
+                    totalEls.forEach(el => { el.innerHTML = '₹' + grandTotal.toFixed(2); });
+                }
+            </script>
             <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
             <script>
                 // Function to get cart total and products from main.js
@@ -1942,9 +2046,18 @@
                         });
                     });
 
+                    // Apply coupon discount if any
+                    let discount = 0;
+                    if (typeof appliedCoupon !== 'undefined' && appliedCoupon && appliedCoupon.discount_amount) {
+                        discount = appliedCoupon.discount_amount;
+                    }
+                    const finalAmount = Math.max(0, Math.round(totalCart - discount));
+
                     return {
-                        totalAmount: Math.round(totalCart),
-                        products: products
+                        totalAmount: finalAmount,
+                        products: products,
+                        coupon_code: appliedCoupon ? appliedCoupon.code : null,
+                        discount: discount
                     };
                 }
 
