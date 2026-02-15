@@ -757,14 +757,15 @@
                         <div class="checkout-block">
                             <div class="heading5 pb-3">Your Order</div>
                             <div class="list-product-checkout"></div> <!-- This should be targeted -->
-                            <div class="coupon-apply-block py-4 border-b border-line" id="checkoutCouponBlock">
-                                <div class="flex gap-2">
+                            <div class="coupon-apply-block py-5 border-b border-line" id="checkoutCouponBlock">
+                                <div class="text-title pb-3">Have a coupon?</div>
+                                <div class="flex gap-3 items-center">
                                     <input type="text" id="couponCodeInput" placeholder="Enter coupon code"
-                                        class="border-line px-4 py-2 rounded-lg flex-1 text-sm" style="border:1px solid #e5e5e5;" />
+                                        class="border-line px-4 py-3 rounded-lg flex-1 text-sm" style="border:1px solid #e5e5e5; text-transform:uppercase;" />
                                     <button type="button" id="applyCouponBtn"
-                                        class="button-main px-5 py-2 text-sm rounded-lg" style="white-space:nowrap;">Apply</button>
+                                        class="button-main px-6 py-3 text-sm rounded-lg" style="white-space:nowrap; min-width:100px;">Apply</button>
                                 </div>
-                                <div id="couponMsg" class="text-xs mt-2" style="display:none;"></div>
+                                <div id="couponMsg" class="text-xs mt-3" style="display:none;"></div>
                             </div>
                             <div class="discount-block py-5 flex justify-between border-b border-line">
                                 <div class="text-title">Discounts</div>
@@ -792,6 +793,7 @@
                 </div>
             </div>
 
+            <div style="padding-bottom:60px;"></div>
             <!--Footer-->
             <div id="footer" class="footer">
                 <div class="footer-main bg-secondary text-surface"

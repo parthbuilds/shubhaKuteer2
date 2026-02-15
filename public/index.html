@@ -2569,9 +2569,12 @@
         (async function loadDynamicBanners() {
             try {
                 const res = await fetch('/api/banners/active');
-                if (!res.ok) return;
+                if (!res.ok) { console.log('Banner API returned', res.status); return; }
                 const data = await res.json();
-                if (!data.success || !data.banners || data.banners.length === 0) return;
+                if (!data.success || !data.banners || data.banners.length === 0) {
+                    console.log('No active banners found, keeping static banners');
+                    return;
+                }
 
                 const homeBanners = data.banners.filter(b => b.page_location === 'home');
                 const heroBanners = homeBanners.filter(b => b.banner_type === 'hero');
@@ -2581,6 +2584,14 @@
                 if (heroBanners.length > 0) {
                     const wrapper = document.getElementById('heroSliderWrapper');
                     if (wrapper) {
+                        const swiperEl = wrapper.closest('.swiper');
+
+                        // Destroy existing Swiper instance first
+                        if (swiperEl && swiperEl.swiper) {
+                            swiperEl.swiper.destroy(true, true);
+                        }
+
+                        // Inject new slides
                         wrapper.innerHTML = heroBanners.map(b => `
                             <div class="swiper-slide">
                                 <div class="slider-item h-full w-full relative overflow-hidden">
@@ -2597,11 +2608,18 @@
                                 </div>
                             </div>
                         `).join('');
-                        // Re-init swiper if available
-                        const swiperEl = wrapper.closest('.swiper');
-                        if (swiperEl && swiperEl.swiper) {
-                            swiperEl.swiper.update();
+
+                        // Re-create Swiper with same options as main.js
+                        if (swiperEl) {
+                            new Swiper(swiperEl, {
+                                spaceBetween: 0,
+                                slidesPerView: 1,
+                                pagination: { el: ".swiper-pagination", clickable: true },
+                                loop: heroBanners.length > 1,
+                                autoplay: { delay: 4000, disableOnInteraction: false }
+                            });
                         }
+                        console.log('Hero banners loaded:', heroBanners.length);
                     }
                 }
 
@@ -2621,10 +2639,11 @@
                                 </div>
                             </a>
                         `).join('');
+                        console.log('Promo banners loaded:', promoBanners.length);
                     }
                 }
             } catch (e) {
-                console.log('Banner load skipped:', e.message);
+                console.log('Banner load error:', e.message);
             }
         })();
     </script>
