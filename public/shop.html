@@ -573,7 +573,7 @@
         </div>
     </div>
 
-    <div class="slider-block style-nine w-full px-4 xl:py-[100px] md:py-20 py-14 "
+    <div id="shopBannerBlock" class="slider-block style-nine w-full px-4 xl:py-[100px] md:py-20 py-14 "
         style="background-image: url('assets/images/banner/Shubha Kuteer website.png'); background-size:cover; background-position:bottom; ">
 
         <div class="slider-main h-full w-full flex items-center justify-center gap-10 ">
@@ -2090,6 +2090,27 @@
     <script src="./assets/js/shop.js"></script>
     <script src="./assets/js/main.js"></script>
     <script src="./assets/js/search.js"></script>
+    <script>
+        // Slot-based shop banner loading
+        (async function() {
+            try {
+                const res = await fetch('/api/banners/slots');
+                if (!res.ok) return;
+                const data = await res.json();
+                const s = (data.slots || {})['shop_banner'];
+                if (!s) return;
+                const block = document.getElementById('shopBannerBlock');
+                if (!block) return;
+                if (s.image_url) block.style.backgroundImage = `url('${s.image_url}')`;
+                const sub = block.querySelector('.text-sub-display');
+                const title = block.querySelector('.text-display');
+                const link = block.querySelector('.button-main');
+                if (sub && s.description) sub.textContent = s.description;
+                if (title && s.title) title.innerHTML = s.title.replace(/\n/g, '<br/>');
+                if (link && s.link_url) link.href = s.link_url;
+            } catch(e) {}
+        })();
+    </script>
 </body>
 
 </html>

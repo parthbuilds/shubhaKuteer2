@@ -574,7 +574,7 @@
     </div>
 
     <!-- Slider -->
-    <div class="slider-block style-nine w-full px-4 xl:py-[100px] md:py-20 py-14 "
+    <div id="newcollBannerBlock" class="slider-block style-nine w-full px-4 xl:py-[100px] md:py-20 py-14 "
         style="background-image: url('assets/images/banner/new-collection banner.png'); background-size:cover; background-position:bottom; ">
 
         <div class="slider-main h-full w-full flex items-center justify-center gap-10 ">
@@ -1632,7 +1632,7 @@
     <!-- Featured Product card Section -->
     <div class="banner-block md:pt-20 md:pb-20 pt-10 pb-10">
         <div class="container">
-            <div class="list-banner grid lg:grid-cols-3 sm:grid-cols-2 lg:gap-[30px] gap-[20px]">
+            <div id="newcollCardsGrid" class="list-banner grid lg:grid-cols-3 sm:grid-cols-2 lg:gap-[30px] gap-[20px]">
                 <a href="shop.html?cat=Honeycomb%20Towels" class="banner-item relative block duration-500">
                     <div class="banner-img w-full rounded-2xl overflow-hidden">
                         <img src="./assets/images/card/offer-banner-4.png" class="w-full duration-500" alt="img" />
@@ -2805,6 +2805,62 @@
     <script src="./assets/js/shop.js"></script>
     <script src="./assets/js/main.js"></script>
     <script src="./assets/js/search.js"></script>
+    <script>
+        // Slot-based new-collection banner + cards loading
+        (async function() {
+            try {
+                const res = await fetch('/api/banners/slots');
+                if (!res.ok) return;
+                const data = await res.json();
+                const slots = data.slots || {};
+
+                // Banner
+                const sb = slots['newcoll_banner'];
+                if (sb) {
+                    const block = document.getElementById('newcollBannerBlock');
+                    if (block) {
+                        if (sb.image_url) block.style.backgroundImage = `url('${sb.image_url}')`;
+                        const sub = block.querySelector('.text-sub-display');
+                        const title = block.querySelector('.text-display');
+                        const link = block.querySelector('.button-main');
+                        if (sub && sb.description) sub.textContent = sb.description;
+                        if (title && sb.title) title.innerHTML = sb.title.replace(/\n/g, '<br/>');
+                        if (link && sb.link_url) link.href = sb.link_url;
+                    }
+                }
+
+                // Feature cards
+                const cardSlots = ['newcoll_card_1', 'newcoll_card_2', 'newcoll_card_3'];
+                const hasCardCustom = cardSlots.some(s => slots[s]);
+                if (hasCardCustom) {
+                    const grid = document.getElementById('newcollCardsGrid');
+                    if (grid) {
+                        const defaultCards = [
+                            { title: 'New Arrivals<br/>sale 20% off', img: './assets/images/card/offer-banner-4.png', link: 'shop.html?cat=Honeycomb%20Towels' },
+                            { title: 'Hand Bags<br/>collection', img: './assets/images/card/offer-banner-5.png', link: 'shop.html?cat=Bags%20and%20Kits' },
+                            { title: '20% off<br/>accessories', img: './assets/images/card/offer-banner-6.png', link: 'shop.html?cat=Bags%20and%20Kits' }
+                        ];
+                        grid.innerHTML = cardSlots.map((slotId, i) => {
+                            const c = slots[slotId];
+                            const d = defaultCards[i];
+                            const title = c ? c.title : d.title;
+                            const img = c ? c.image_url : d.img;
+                            const link = c ? (c.link_url || d.link) : d.link;
+                            return `<a href="${link}" class="banner-item relative block duration-500${i >= 2 ? ' max-lg:hidden' : ''}">
+                                <div class="banner-img w-full rounded-2xl overflow-hidden">
+                                    <img src="${img}" class="w-full duration-500" alt="${title}" />
+                                </div>
+                                <div class="banner-content absolute left-[30px] bottom-[30px]">
+                                    <div class="heading4">${title}</div>
+                                    <div class="text-white relative inline-block pb-1 border-b-2 border-black duration-500 mt-14">Shop Now</div>
+                                </div>
+                            </a>`;
+                        }).join('');
+                    }
+                }
+            } catch(e) {}
+        })();
+    </script>
 </body>
 
 </html>

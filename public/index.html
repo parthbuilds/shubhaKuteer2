@@ -2565,85 +2565,97 @@
     </script>
     <script src="./assets/js/search.js"></script>
     <script>
-        // Dynamic banner loading from database
-        (async function loadDynamicBanners() {
+        // Slot-based dynamic banner loading
+        (async function loadSlotBanners() {
             try {
-                const res = await fetch('/api/banners/active');
-                if (!res.ok) { console.log('Banner API returned', res.status); return; }
+                const res = await fetch('/api/banners/slots');
+                if (!res.ok) return;
                 const data = await res.json();
-                if (!data.success || !data.banners || data.banners.length === 0) {
-                    console.log('No active banners found, keeping static banners');
-                    return;
-                }
+                const slots = data.slots || {};
+                if (Object.keys(slots).length === 0) return;
 
-                const homeBanners = data.banners.filter(b => b.page_location === 'home');
-                const heroBanners = homeBanners.filter(b => b.banner_type === 'hero');
-                const promoBanners = homeBanners.filter(b => b.banner_type === 'promotional');
+                // Hero slides — check each slot individually
+                const heroSlots = ['home_hero_1', 'home_hero_2', 'home_hero_3'];
+                const hasHeroCustom = heroSlots.some(s => slots[s]);
 
-                // Replace hero slider if we have hero banners
-                if (heroBanners.length > 0) {
+                if (hasHeroCustom) {
                     const wrapper = document.getElementById('heroSliderWrapper');
                     if (wrapper) {
                         const swiperEl = wrapper.closest('.swiper');
+                        if (swiperEl && swiperEl.swiper) swiperEl.swiper.destroy(true, true);
 
-                        // Destroy existing Swiper instance first
-                        if (swiperEl && swiperEl.swiper) {
-                            swiperEl.swiper.destroy(true, true);
-                        }
+                        // For each hero slot, use custom data if available, else keep default
+                        const defaultHeroes = [
+                            { title: 'Soft Absorbent Towels for Lasting Freshness', desc: 'Sale! Up To 30% Off!', img: './assets/images/banner/home-banner-2.png', link: 'shop.html?cat=Honeycomb%20Towels' },
+                            { title: 'Stylish Pillow Covers for Cozy Living', desc: 'Sale! Up To 50% Off!', img: './assets/images/banner/home-banner-3.png', link: 'shop.html?cat=Cushions%20and%20Pillow%20Covers' },
+                            { title: 'Premium Bedsheets Crafted for Comfort', desc: 'Sale! Up To 50% Off!', img: './assets/images/banner/home-banner-4.png', link: 'shop.html?cat=Bedsheets' }
+                        ];
 
-                        // Inject new slides
-                        wrapper.innerHTML = heroBanners.map(b => `
-                            <div class="swiper-slide">
+                        wrapper.innerHTML = heroSlots.map((slotId, i) => {
+                            const c = slots[slotId];
+                            const d = defaultHeroes[i];
+                            const title = c ? c.title : d.title;
+                            const desc = c ? (c.description || d.desc) : d.desc;
+                            const img = c ? c.image_url : d.img;
+                            const link = c ? (c.link_url || d.link) : d.link;
+                            return `<div class="swiper-slide">
                                 <div class="slider-item h-full w-full relative overflow-hidden">
                                     <div class="container w-full h-full flex items-center">
                                         <div class="text-content sm:w-1/2 w-2/3">
-                                            <div class="text-sub-display">${b.description || ''}</div>
-                                            <div class="text-display md:mt-5 mt-2">${b.title}</div>
-                                            ${b.link_url ? `<a href="${b.link_url}" target="${b.link_target || '_self'}" class="button-main md:mt-8 mt-3">Shop Now</a>` : ''}
+                                            <div class="text-sub-display">${desc}</div>
+                                            <div class="text-display md:mt-5 mt-2">${title}</div>
+                                            <a href="${link}" class="button-main md:mt-8 mt-3">Shop Now</a>
                                         </div>
                                         <div class="sub-img absolute left-0 top-0 w-full h-full z-[-1]">
-                                            <img src="${b.image_url}" alt="${b.title}" class="w-full h-full object-cover" />
+                                            <img src="${img}" alt="${title}" class="w-full h-full object-cover" />
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        `).join('');
+                            </div>`;
+                        }).join('');
 
-                        // Re-create Swiper with same options as main.js
                         if (swiperEl) {
                             new Swiper(swiperEl, {
-                                spaceBetween: 0,
-                                slidesPerView: 1,
+                                spaceBetween: 0, slidesPerView: 1,
                                 pagination: { el: ".swiper-pagination", clickable: true },
-                                loop: heroBanners.length > 1,
-                                autoplay: { delay: 4000, disableOnInteraction: false }
+                                loop: true, autoplay: { delay: 4000, disableOnInteraction: false }
                             });
                         }
-                        console.log('Hero banners loaded:', heroBanners.length);
                     }
                 }
 
-                // Replace offer banners if we have promotional banners
-                if (promoBanners.length > 0) {
+                // Offer cards — check each slot individually
+                const cardSlots = ['home_card_1', 'home_card_2', 'home_card_3'];
+                const hasCardCustom = cardSlots.some(s => slots[s]);
+
+                if (hasCardCustom) {
                     const grid = document.getElementById('offerBannersGrid');
                     if (grid) {
-                        grid.innerHTML = promoBanners.map((b, i) => `
-                            <a href="${b.link_url || '#'}" target="${b.link_target || '_self'}"
-                               class="banner-item relative block duration-500${i >= 2 ? ' max-lg:hidden' : ''}">
+                        const defaultCards = [
+                            { title: 'New Arrivals<br/>sale 20% off', img: './assets/images/card/offer-banner-1.png', link: 'shop.html?cat=Bags%20and%20Kits' },
+                            { title: 'Winter Sale<br/>collection', img: './assets/images/card/offer-banner-2.png', link: 'shop.html?cat=Dohar%20and%20Quilts' },
+                            { title: '20% off<br/>accessories', img: './assets/images/card/offer-banner-3.png', link: 'shop.html?cat=Honeycomb%20Towels' }
+                        ];
+                        grid.innerHTML = cardSlots.map((slotId, i) => {
+                            const c = slots[slotId];
+                            const d = defaultCards[i];
+                            const title = c ? c.title : d.title;
+                            const img = c ? c.image_url : d.img;
+                            const link = c ? (c.link_url || d.link) : d.link;
+                            return `<a href="${link}" class="banner-item relative block duration-500${i >= 2 ? ' max-lg:hidden' : ''}">
                                 <div class="banner-img w-full rounded-2xl overflow-hidden">
-                                    <img src="${b.image_url}" class="w-full duration-500" alt="${b.title}" />
+                                    <img src="${img}" class="w-full duration-500" alt="${title}" />
                                 </div>
                                 <div class="banner-content absolute left-[30px] bottom-[30px]">
-                                    <div class="heading4">${b.title}</div>
+                                    <div class="heading4">${title}</div>
                                     <div class="text-black relative inline-block pb-1 border-b-2 border-black duration-500 mt-14">Shop Now</div>
                                 </div>
-                            </a>
-                        `).join('');
-                        console.log('Promo banners loaded:', promoBanners.length);
+                            </a>`;
+                        }).join('');
                     }
                 }
             } catch (e) {
-                console.log('Banner load error:', e.message);
+                console.log('Banner load:', e.message);
             }
         })();
     </script>

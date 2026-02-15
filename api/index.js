@@ -630,20 +630,33 @@ export default async function handler(req, res) {
 
 
 
-        // Public banners endpoint (no auth required)
-        if (pathname === '/api/banners/active' && req.method === 'GET') {
+        // Public banners endpoint — returns active slot overrides (no auth required)
+        if ((pathname === '/api/banners/active' || pathname === '/api/banners/slots') && req.method === 'GET') {
             try {
                 const pool = await import("../backend/utils/db.js");
+                // Auto-migrate: ensure slot_id column exists
+                try {
+                    const [cols] = await pool.default.query(`SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'banners' AND COLUMN_NAME = 'slot_id'`);
+                    if (cols.length === 0) {
+                        await pool.default.query(`ALTER TABLE banners ADD COLUMN slot_id VARCHAR(50) DEFAULT NULL`);
+                        await pool.default.query(`CREATE UNIQUE INDEX idx_banners_slot_id ON banners(slot_id)`).catch(() => {});
+                    }
+                } catch(e) { console.error('Migration check:', e.message); }
+
                 const [rows] = await pool.default.query(`
-                    SELECT id, title, description, banner_type, image_url, mobile_image_url,
+                    SELECT id, slot_id, title, description, banner_type, image_url, mobile_image_url,
                         link_url, link_target, position, page_location, start_date, end_date
                     FROM banners
                     WHERE active = 1
+                        AND slot_id IS NOT NULL
                         AND (start_date IS NULL OR start_date <= NOW())
                         AND (end_date IS NULL OR end_date >= NOW())
                     ORDER BY page_location, position ASC
                 `);
-                return res.status(200).json({ success: true, banners: rows });
+                // Build a map of slot_id -> banner data for easy frontend lookup
+                const slots = {};
+                rows.forEach(b => { if (b.slot_id) slots[b.slot_id] = b; });
+                return res.status(200).json({ success: true, banners: rows, slots });
             } catch (error) {
                 console.error("Public banners error:", error);
                 return res.status(500).json({ success: false, message: "Failed to load banners" });
@@ -722,128 +735,109 @@ export default async function handler(req, res) {
             }
         }
 
-        // Banners routes
+        // Banners routes (slot-based system)
         if (pathname.startsWith('/api/admin/banners')) {
             try {
                 const pool = await import("../backend/utils/db.js");
 
-                // GET all banners
-                if (pathname === '/api/admin/banners' && req.method === 'GET') {
-                    const [rows] = await pool.default.query(`
-                        SELECT * FROM banners ORDER BY position ASC, created_at DESC
-                    `);
-                    // With dateStrings:true, dates come as 'YYYY-MM-DD HH:mm:ss' strings
-                    // Convert to 'YYYY-MM-DDTHH:mm' for datetime-local inputs
-                    const fmtDate = (d) => d ? d.slice(0, 16).replace(' ', 'T') : null;
-                    const banners = rows.map(b => ({
-                        ...b,
-                        start_date: fmtDate(b.start_date),
-                        end_date: fmtDate(b.end_date),
-                    }));
-                    return res.status(200).json({ success: true, banners });
-                }
+                // Auto-migrate: ensure slot_id column exists
+                try {
+                    const [cols] = await pool.default.query(`SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'banners' AND COLUMN_NAME = 'slot_id'`);
+                    if (cols.length === 0) {
+                        await pool.default.query(`ALTER TABLE banners ADD COLUMN slot_id VARCHAR(50) DEFAULT NULL`);
+                        await pool.default.query(`CREATE UNIQUE INDEX idx_banners_slot_id ON banners(slot_id)`).catch(() => {});
+                    }
+                } catch(e) { console.error('Migration check:', e.message); }
 
-                // Helper: normalize datetime string to MySQL format (no timezone conversion)
+                // Helper: normalize datetime string to MySQL format
                 const normalizeDate = (d) => {
                     if (!d) return null;
-                    // Convert 'YYYY-MM-DDTHH:mm' or 'YYYY-MM-DDTHH:mm:ss' to 'YYYY-MM-DD HH:mm:ss'
                     let s = String(d).replace('T', ' ');
                     if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(s)) s += ':00';
                     return s;
                 };
+                const fmtDate = (d) => d ? d.slice(0, 16).replace(' ', 'T') : null;
 
-                // POST new banner
-                if (pathname === '/api/admin/banners' && req.method === 'POST') {
-                    const {
-                        title, description, banner_type, image_url, mobile_image_url,
-                        link_url, link_target, position, page_location,
-                        start_date, end_date, active
-                    } = req.body;
-
-                    if (!title || !banner_type || !image_url) {
-                        return res.status(400).json({ success: false, message: 'Title, banner type, and image URL are required' });
-                    }
-
-                    const [result] = await pool.default.query(`
-                        INSERT INTO banners (title, description, banner_type, image_url, mobile_image_url,
-                            link_url, link_target, position, page_location, start_date, end_date, active)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    `, [
-                        title, description || null, banner_type, image_url, mobile_image_url || null,
-                        link_url || null, link_target || '_self', parseInt(position) || 0,
-                        page_location || null, normalizeDate(start_date), normalizeDate(end_date),
-                        active !== undefined ? (active ? 1 : 0) : 1
-                    ]);
-
-                    return res.status(201).json({
-                        success: true,
-                        message: 'Banner created successfully',
-                        id: result.insertId
-                    });
-                }
-
-                // PUT update banner
-                if (pathname.startsWith('/api/admin/banners/') && req.method === 'PUT') {
-                    const id = pathname.split('/').pop();
-                    const {
-                        title, description, banner_type, image_url, mobile_image_url,
-                        link_url, link_target, position, page_location,
-                        start_date, end_date, active
-                    } = req.body;
-
-                    if (!title || !banner_type || !image_url) {
-                        return res.status(400).json({ success: false, message: 'Title, banner type, and image URL are required' });
-                    }
-
-                    const [result] = await pool.default.query(`
-                        UPDATE banners SET title=?, description=?, banner_type=?, image_url=?,
-                            mobile_image_url=?, link_url=?, link_target=?, position=?,
-                            page_location=?, start_date=?, end_date=?, active=?
-                        WHERE id=?
-                    `, [
-                        title, description || null, banner_type, image_url, mobile_image_url || null,
-                        link_url || null, link_target || '_self', parseInt(position) || 0,
-                        page_location || null, normalizeDate(start_date), normalizeDate(end_date),
-                        active !== undefined ? (active ? 1 : 0) : 1, id
-                    ]);
-
-                    if (result.affectedRows === 0) {
-                        return res.status(404).json({ success: false, message: 'Banner not found' });
-                    }
-
-                    return res.status(200).json({ success: true, message: 'Banner updated successfully' });
-                }
-
-                // DELETE banner (with server-side Cloudinary cleanup)
-                if (pathname.startsWith('/api/admin/banners/') && req.method === 'DELETE') {
-                    const id = pathname.split('/').pop();
-
-                    // Fetch banner images before deleting
-                    const [bannerRows] = await pool.default.query("SELECT image_url, mobile_image_url FROM banners WHERE id = ?", [id]);
-                    if (bannerRows.length === 0) {
-                        return res.status(404).json({ success: false, message: 'Banner not found' });
-                    }
-
-                    const [result] = await pool.default.query("DELETE FROM banners WHERE id = ?", [id]);
-
-                    // Delete images from Cloudinary server-side
+                // Cloudinary cleanup helper
+                const cleanupCloudinary = async (imageUrl) => {
+                    if (!imageUrl || !imageUrl.includes('cloudinary')) return;
                     try {
                         const cloudinary = await import("../backend/utils/cloudinary.js");
-                        const getPublicId = (url) => {
-                            if (!url || !url.includes('cloudinary')) return null;
-                            const parts = url.split('/upload/');
-                            if (parts.length < 2) return null;
-                            let path = parts[1].replace(/^v\d+\//, '').replace(/\.[^/.]+$/, '');
-                            return path;
-                        };
-                        const img = bannerRows[0];
-                        const pid1 = getPublicId(img.image_url);
-                        const pid2 = getPublicId(img.mobile_image_url);
-                        if (pid1) await cloudinary.default.uploader.destroy(pid1).catch(e => console.error('Cloudinary delete error:', e));
-                        if (pid2) await cloudinary.default.uploader.destroy(pid2).catch(e => console.error('Cloudinary delete error:', e));
-                    } catch (e) {
-                        console.error('Cloudinary cleanup failed (non-fatal):', e.message);
+                        const parts = imageUrl.split('/upload/');
+                        if (parts.length < 2) return;
+                        const pid = parts[1].replace(/^v\d+\//, '').replace(/\.[^/.]+$/, '');
+                        if (pid) await cloudinary.default.uploader.destroy(pid).catch(() => {});
+                    } catch(e) { console.error('Cloudinary cleanup:', e.message); }
+                };
+
+                // GET all banners (admin)
+                if (pathname === '/api/admin/banners' && req.method === 'GET') {
+                    const [rows] = await pool.default.query(`SELECT * FROM banners ORDER BY slot_id ASC, position ASC`);
+                    const banners = rows.map(b => ({ ...b, start_date: fmtDate(b.start_date), end_date: fmtDate(b.end_date) }));
+                    // Build slot map
+                    const slots = {};
+                    banners.forEach(b => { if (b.slot_id) slots[b.slot_id] = b; });
+                    return res.status(200).json({ success: true, banners, slots });
+                }
+
+                // PUT upsert a banner slot — /api/admin/banners/slot/:slotId
+                if (pathname.startsWith('/api/admin/banners/slot/') && req.method === 'PUT') {
+                    const slotId = pathname.replace('/api/admin/banners/slot/', '');
+                    const { title, description, image_url, link_url, link_target, banner_type, page_location } = req.body;
+
+                    if (!image_url) {
+                        return res.status(400).json({ success: false, message: 'Image URL is required' });
                     }
+
+                    // Check if slot already exists
+                    const [existing] = await pool.default.query(`SELECT id, image_url FROM banners WHERE slot_id = ?`, [slotId]);
+
+                    if (existing.length > 0) {
+                        // If image changed, cleanup old cloudinary image
+                        if (existing[0].image_url !== image_url) {
+                            await cleanupCloudinary(existing[0].image_url);
+                        }
+                        await pool.default.query(`
+                            UPDATE banners SET title=?, description=?, image_url=?, link_url=?,
+                                link_target=?, banner_type=?, page_location=?, active=1
+                            WHERE slot_id=?
+                        `, [title || '', description || '', image_url, link_url || '', link_target || '_self',
+                            banner_type || 'hero', page_location || 'home', slotId]);
+                    } else {
+                        await pool.default.query(`
+                            INSERT INTO banners (slot_id, title, description, image_url, link_url,
+                                link_target, banner_type, page_location, position, active)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+                        `, [slotId, title || '', description || '', image_url, link_url || '',
+                            link_target || '_self', banner_type || 'hero', page_location || 'home', 0]);
+                    }
+
+                    return res.status(200).json({ success: true, message: 'Slot updated successfully' });
+                }
+
+                // DELETE revert a banner slot — /api/admin/banners/slot/:slotId
+                if (pathname.startsWith('/api/admin/banners/slot/') && req.method === 'DELETE') {
+                    const slotId = pathname.replace('/api/admin/banners/slot/', '');
+
+                    // Fetch image for cleanup
+                    const [rows] = await pool.default.query(`SELECT image_url FROM banners WHERE slot_id = ?`, [slotId]);
+                    if (rows.length > 0) {
+                        await cleanupCloudinary(rows[0].image_url);
+                        await pool.default.query(`DELETE FROM banners WHERE slot_id = ?`, [slotId]);
+                    }
+
+                    return res.status(200).json({ success: true, message: 'Slot reverted to original' });
+                }
+
+                // DELETE by id (legacy) — /api/admin/banners/:id
+                if (pathname.startsWith('/api/admin/banners/') && req.method === 'DELETE') {
+                    const id = pathname.split('/').pop();
+                    const [bannerRows] = await pool.default.query("SELECT image_url, mobile_image_url FROM banners WHERE id = ?", [id]);
+                    if (bannerRows.length === 0) return res.status(404).json({ success: false, message: 'Banner not found' });
+
+                    await pool.default.query("DELETE FROM banners WHERE id = ?", [id]);
+                    await cleanupCloudinary(bannerRows[0].image_url);
+                    await cleanupCloudinary(bannerRows[0].mobile_image_url);
 
                     return res.status(200).json({ success: true, message: 'Banner deleted successfully' });
                 }
