@@ -705,6 +705,12 @@
 
     <!-- Javascript -->
     <script>
+        // Safety: remove preloader after 3s even if main.js errors
+        setTimeout(function() {
+            var pre = document.getElementById('preload');
+            if (pre) pre.style.display = 'none';
+        }, 3000);
+
         let allOrders = [];
         let currentPage = 1;
         const pageSize = 10;

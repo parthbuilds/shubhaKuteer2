@@ -19,21 +19,25 @@
   "use strict";
 
   var selectImages = function () {
-    if ($(".image-select").length > 0) {
-      const selectIMG = $(".image-select");
-      selectIMG.find("option").each((idx, elem) => {
-        const selectOption = $(elem);
-        const imgURL = selectOption.attr("data-thumbnail");
-        if (imgURL) {
-          selectOption.attr(
-            "data-content",
-            "<img src='%i'/> %s"
-              .replace(/%i/, imgURL)
-              .replace(/%s/, selectOption.text())
-          );
-        }
-      });
-      selectIMG.selectpicker();
+    try {
+      if ($(".image-select").length > 0) {
+        const selectIMG = $(".image-select");
+        selectIMG.find("option").each((idx, elem) => {
+          const selectOption = $(elem);
+          const imgURL = selectOption.attr("data-thumbnail");
+          if (imgURL) {
+            selectOption.attr(
+              "data-content",
+              "<img src='%i'/> %s"
+                .replace(/%i/, imgURL)
+                .replace(/%s/, selectOption.text())
+            );
+          }
+        });
+        selectIMG.selectpicker();
+      }
+    } catch (e) {
+      console.warn('selectImages error:', e);
     }
   };
 
@@ -251,23 +255,26 @@ var btnQuantity = function () {
 
   // Dom Ready
   $(function () {
-    selectImages();
-    menuleft();
-    tabs();
-    progresslevel();
-    collapse_menu();
-    fullcheckbox();
-    showpass();
-    gallery();
-    coppy();
-    select_colors_theme();
-    icon_function();
-    box_search();
-    retinaLogos();
-    variant_picker();
-    btnQuantity();
     preloader();
-    
+    try {
+      selectImages();
+      menuleft();
+      tabs();
+      progresslevel();
+      collapse_menu();
+      fullcheckbox();
+      showpass();
+      gallery();
+      coppy();
+      select_colors_theme();
+      icon_function();
+      box_search();
+      retinaLogos();
+      variant_picker();
+      btnQuantity();
+    } catch (e) {
+      console.warn('Admin main.js init error:', e);
+    }
   });
 
 })(jQuery);
