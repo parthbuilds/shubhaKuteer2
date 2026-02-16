@@ -2075,7 +2075,7 @@
                 // Render products
                 if (typeof renderProducts === 'function') renderProducts(1, filtered);
                 if (typeof renderPagination === 'function') renderPagination(filtered);
-                if (typeof addEventToProductItem === 'function') addEventToProductItem(filtered);
+                // Note: shopAddEventToProductItem is called inside renderProducts, no need to call again
 
             } catch (err) {
                 console.error('Error loading products:', err);

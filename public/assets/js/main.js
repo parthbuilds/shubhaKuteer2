@@ -97,23 +97,7 @@ function transformBackendProduct(backendProduct) {
     }
   }
 
-  // Default variations if backend lacks color info
-  if (variations.length === 0) {
-    variations = [
-      {
-        color: "Red",
-        colorCode: "#DB4444",
-        colorImage: "./assets/images/product/color/48x48.png",
-        image: backendProduct.main_image || "./assets/images/product/bag-1.png",
-      },
-      {
-        color: "Yellow",
-        colorCode: "#ECB018",
-        colorImage: "./assets/images/product/color/48x48.png",
-        image: backendProduct.main_image || "./assets/images/product/bag-1.png",
-      },
-    ];
-  }
+  // If no real color attributes found, leave variations empty (no fake dots)
 
   // ---- 4. Default Sizes ----
   const defaultSizes = ["S", "M", "L", "XL"];
@@ -1665,6 +1649,9 @@ function addEventToProductItem(products) {
 
   if (productItems) {
     productItems.forEach((product) => {
+      // Skip shop page products — handled by shopAddEventToProductItem in shop.js
+      if (product.closest('.list-product-block .list-product')) return;
+
       const productId = product.getAttribute("data-item");
 
       product.addEventListener("click", () => {

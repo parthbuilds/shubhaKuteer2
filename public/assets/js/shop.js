@@ -161,13 +161,8 @@ window.transformBackendProduct = function transformBackendProduct(backendProduct
         }
     }
 
-    // Fallback to default variations if none are generated from backend attributes
-    if (variations.length === 0) {
-        variations = [
-            { color: "red", colorCode: "#DB4444", colorImage: "./assets/images/product/color/48x48.png", image: backendProduct.main_image || "./assets/images/product/bag-1.png" },
-            { color: "yellow", colorCode: "#ECB018", colorImage: "./assets/images/product/color/48x48.png", image: backendProduct.main_image || "./assets/images/product/bag-1.png" }
-        ];
-    }
+    // If no real color attributes found, leave variations empty (no fake dots)
+    // variations stays as [] if nothing was parsed from backend
     // --- END OF MODIFICATION FOR VARIATIONS (UPDATED FOR 'code' KEY) ---
 
 
@@ -254,7 +249,7 @@ async function fetchProductsFromBackend() {
                 currentPage = 1; // Always reset to page 1 on layout change
                 window.renderProducts(currentPage, window.productsData);
                 window.renderPagination(window.productsData);
-                window.addEventToProductItem(window.productsData);
+                // Note: shopAddEventToProductItem is called inside renderProducts, no need to call again
             });
         });
 
@@ -484,7 +479,7 @@ async function fetchProductsFromBackend() {
             window.renderProducts(1, filteredProducts);
             currentPage = 1;
             window.renderPagination(filteredProducts)
-            window.addEventToProductItem(filteredProducts) // Add event listeners to newly rendered items
+            // Note: shopAddEventToProductItem is called inside renderProducts, no need to call again
         }
 
         // filter product
@@ -690,13 +685,6 @@ window.renderProducts = function renderProducts(page, products = []) { // Expose
                                         Add To Wishlist</div>
                                     <i class="ph ph-heart text-lg"></i>
                                 </div>
-                                <div
-                                    class="compare-btn w-[32px] h-[32px] flex items-center justify-center rounded-full bg-white duration-300 relative mt-2">
-                                    <div class="tag-action bg-black text-white caption2 px-1.5 py-0.5 rounded-sm">
-                                        Compare Product</div>
-                                    <i class="ph ph-arrow-counter-clockwise text-lg compare-icon"></i>
-                                    <i class="ph ph-check-circle text-lg checked-icon"></i>
-                                </div>
                             </div>
                             <div class="product-img w-full h-full aspect-[3/4]">
                                 ${productImages}
@@ -760,7 +748,7 @@ window.renderProducts = function renderProducts(page, products = []) { // Expose
 </div>
 </div>
 <div class="product-name text-title duration-300">${product.name}</div>
-${product.variation.length > 0 && product.action === 'add to cart' ? (
+${product.variation.length > 0 ? (
                     `
         <div class="list-color py-2 max-md:hidden flex items-center gap-3 flex-wrap duration-500">
             ${product.variation.map((item, index) => (
@@ -774,27 +762,7 @@ ${product.variation.length > 0 && product.action === 'add to cart' ? (
                 `
                     )).join('')}
         </div>`
-                ) : (
-                    `
-        <div class="list-color list-color-image max-md:hidden flex items-center gap-3 flex-wrap duration-500">
-            ${product.variation.map((item, index) => (
-                        `
-                <div
-                    class="color-item w-12 h-12 rounded-xl duration-300 relative"
-                    key="${index}"
-                >
-                    <img
-                        src="${item.colorImage}"
-                        alt='color'
-                        class='rounded-xl w-full h-full object-cover'
-                    />
-                    <div class="tag-action bg-black text-white caption2 capitalize px-1.5 py-0.5 rounded-sm">${item.color}</div>
-                </div>
-            `
-                    )).join('')}
-        </div>
-    `
-                )}
+                ) : ''}
 <div
     class="product-price-block flex items-center gap-2 flex-wrap mt-1 duration-300 relative z-[1]">
     <div class="product-price text-title">₹${product.price}.00</div>
@@ -875,13 +843,6 @@ ${product.variation.length > 0 && product.action === 'add to cart' ? (
                                                 <i class="ph ph-heart text-lg"></i>
                                             </div>
                                         <div
-                                            class="compare-btn w-[32px] h-[32px] flex items-center justify-center rounded-full bg-white duration-300 relative">
-                                            <div class="tag-action bg-black text-white caption2 px-1.5 py-0.5 rounded-sm">
-                                                Compare Product</div>
-                                            <i class="ph ph-arrow-counter-clockwise text-lg compare-icon"></i>
-                                            <i class="ph ph-check-circle text-lg checked-icon"></i>
-                                        </div>
-                                        <div
                                             class="quick-view-btn quick-view-btn-list w-[32px] h-[32px] flex items-center justify-center rounded-full bg-white duration-300 relative">
                                             <div class="tag-action bg-black text-white caption2 px-1.5 py-0.5 rounded-sm">
                                                 Quick View</div>
@@ -897,8 +858,8 @@ ${product.variation.length > 0 && product.action === 'add to cart' ? (
         }
     });
 
-    // Call addEventToProductItem after products are rendered
-    window.addEventToProductItem(products); // Pass products to ensure all items are covered
+    // Call shopAddEventToProductItem after products are rendered
+    window.shopAddEventToProductItem(products); // Pass products to ensure all items are covered
 }
 
 // Function to render pagination buttons
@@ -1012,61 +973,151 @@ window.renderPagination = function renderPagination(products = []) { // Expose g
 // This function needs to be properly implemented based on what 'addEventToProductItem' is supposed to do.
 // For example, it might open quick view modals, add to cart, etc.
 // For now, it's a placeholder to prevent errors.
-window.addEventToProductItem = function addEventToProductItem(products) { // Expose globally
-    // Example: Attach event listeners for quick view buttons
-    document.querySelectorAll('.quick-view-btn').forEach(button => {
-        button.onclick = (e) => {
-            e.preventDefault();
-            const productElement = e.target.closest('.product-item');
-            const productId = productElement ? productElement.getAttribute('data-item') : null;
-            if (productId) {
-                const product = products.find(p => p.id === productId);
-                if (product) {
-                    console.log('Quick View clicked for product:', product.name);
-                    // Implement your quick view modal logic here
-                    alert(`Quick View for: ${product.name}`);
-                }
-            }
-        };
-    });
+window.shopAddEventToProductItem = function shopAddEventToProductItem(products) { // Shop-specific, avoids main.js overwrite
+    const productItems = document.querySelectorAll('.list-product .product-item');
 
-    document.querySelectorAll('.add-cart-btn').forEach(button => {
-        button.onclick = (e) => {
-            e.preventDefault();
-            const productElement = e.target.closest('.product-item');
-            const productId = productElement ? productElement.getAttribute('data-item') : null;
-            if (productId) {
-                const product = products.find(p => p.id === productId);
-                if (product) {
-                    console.log('Add to Cart clicked for product:', product.name);
-                    // Implement your add to cart logic here
-                    alert(`Added to cart: ${product.name}`);
-                }
-            }
-        };
-    });
+    productItems.forEach((item) => {
+        const productId = item.getAttribute('data-item');
+        const addWishlistIcon = item.querySelector('.add-wishlist-btn');
+        const compareIcon = item.querySelector('.compare-btn');
+        const quickviewIcon = item.querySelector('.quick-view-btn');
+        const addCartIcons = item.querySelectorAll('.add-cart-btn');
+        const quickshopIcon = item.querySelector('.quick-shop-btn');
 
-    document.querySelectorAll('.quick-shop-btn').forEach(button => {
-        button.onclick = (e) => {
-            e.preventDefault();
-            const productElement = e.target.closest('.product-item');
-            const productId = productElement ? productElement.getAttribute('data-item') : null;
-            if (productId) {
-                const product = products.find(p => p.id === productId);
-                if (product) {
-                    console.log('Quick Shop clicked for product:', product.name);
-                    // Implement your quick shop modal/inline display logic here
-                    // This might involve showing the .quick-shop-block
-                    const quickShopBlock = productElement.querySelector('.quick-shop-block');
-                    if (quickShopBlock) {
-                        quickShopBlock.classList.toggle('active'); // Toggle visibility
+        // --- Navigate to product detail on click ---
+        item.addEventListener('click', () => {
+            window.location.href = `product-default.html?id=${productId}`;
+        });
+
+        // --- Wishlist ---
+        if (addWishlistIcon) {
+            // Set initial state from localStorage
+            let ws = localStorage.getItem('wishlistStore');
+            ws = ws ? JSON.parse(ws) : [];
+            if (ws.some(p => p.id === productId)) {
+                addWishlistIcon.classList.add('active');
+                addWishlistIcon.querySelector('i')?.classList.remove('ph');
+                addWishlistIcon.querySelector('i')?.classList.add('ph-fill');
+            }
+
+            addWishlistIcon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                let wishlistStore = localStorage.getItem('wishlistStore');
+                wishlistStore = wishlistStore ? JSON.parse(wishlistStore) : [];
+                const existingIndex = wishlistStore.findIndex(p => p.id === productId);
+
+                if (existingIndex > -1) {
+                    wishlistStore.splice(existingIndex, 1);
+                    addWishlistIcon.classList.remove('active');
+                    addWishlistIcon.querySelector('i')?.classList.add('ph');
+                    addWishlistIcon.querySelector('i')?.classList.remove('ph-fill');
+                } else {
+                    const productToAdd = products?.find(p => p.id === productId);
+                    if (productToAdd) {
+                        wishlistStore.push(productToAdd);
+                        addWishlistIcon.classList.add('active');
+                        addWishlistIcon.querySelector('i')?.classList.remove('ph');
+                        addWishlistIcon.querySelector('i')?.classList.add('ph-fill');
+                        openModalWishlist();
                     }
                 }
+                localStorage.setItem('wishlistStore', JSON.stringify(wishlistStore));
+                handleItemModalWishlist();
+            });
+        }
+
+        // --- Compare ---
+        if (compareIcon) {
+            let cs = localStorage.getItem('compareStore');
+            cs = cs ? JSON.parse(cs) : [];
+            if (cs.some(p => p.id === productId)) {
+                compareIcon.classList.add('active');
             }
-        };
+
+            compareIcon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                let compareStore = localStorage.getItem('compareStore');
+                compareStore = compareStore ? JSON.parse(compareStore) : [];
+                const existingIndex = compareStore.findIndex(p => p.id === productId);
+
+                if (existingIndex > -1) {
+                    compareStore.splice(existingIndex, 1);
+                    compareIcon.classList.remove('active');
+                } else {
+                    if (compareStore.length < 3) {
+                        const productToAdd = products?.find(p => p.id === productId);
+                        if (productToAdd) {
+                            compareStore.push(productToAdd);
+                            compareIcon.classList.add('active');
+                        }
+                    } else {
+                        alert('Compare list can hold max 3 products');
+                    }
+                }
+                localStorage.setItem('compareStore', JSON.stringify(compareStore));
+                handleItemModalCompare();
+                openModalCompare();
+            });
+        }
+
+        // --- Quick View ---
+        if (quickviewIcon) {
+            quickviewIcon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                let quickViewStore = localStorage.getItem('quickViewStore');
+                quickViewStore = quickViewStore ? JSON.parse(quickViewStore) : [];
+                const productToAdd = products?.find(p => p.id === productId);
+                if (productToAdd) {
+                    quickViewStore = [productToAdd]; // Replace with current product
+                }
+                localStorage.setItem('quickViewStore', JSON.stringify(quickViewStore));
+                handleItemModalQuickview();
+                openModalQuickview();
+            });
+        }
+
+        // --- Add to Cart ---
+        if (addCartIcons && addCartIcons.length > 0) {
+            addCartIcons.forEach(icon => {
+                icon.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    let cartStore = localStorage.getItem('cartStore');
+                    cartStore = cartStore ? JSON.parse(cartStore) : [];
+                    const existingIndex = cartStore.findIndex(p => p.id === productId);
+
+                    if (existingIndex > -1) {
+                        openModalCart();
+                    } else {
+                        const productToAdd = products?.find(p => p.id === productId);
+                        if (productToAdd) {
+                            cartStore.push(productToAdd);
+                            openModalCart();
+                        }
+                    }
+                    localStorage.setItem('cartStore', JSON.stringify(cartStore));
+                    handleItemModalCart();
+                });
+            });
+        }
+
+        // --- Quick Shop ---
+        if (quickshopIcon) {
+            quickshopIcon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                const quickShopBlock = item.querySelector('.quick-shop-block');
+                if (quickShopBlock) {
+                    quickShopBlock.classList.toggle('active');
+                }
+            });
+        }
     });
 
-    // Hide quick shop block when clicking outside (or handle its visibility in other ways)
+    // Hide quick shop block when clicking outside
     document.addEventListener('click', (e) => {
         document.querySelectorAll('.quick-shop-block.active').forEach(block => {
             if (!block.contains(e.target) && !e.target.closest('.quick-shop-btn')) {
@@ -1077,51 +1128,11 @@ window.addEventToProductItem = function addEventToProductItem(products) { // Exp
 
     // Handle size selection within quick shop block
     document.querySelectorAll('.quick-shop-block .size-item').forEach(sizeItem => {
-        sizeItem.onclick = (e) => {
+        sizeItem.addEventListener('click', (e) => {
             e.preventDefault();
-            sizeItem.parentElement.querySelectorAll('.size-item').forEach(item => item.classList.remove('active'));
+            sizeItem.parentElement.querySelectorAll('.size-item').forEach(si => si.classList.remove('active'));
             sizeItem.classList.add('active');
-            console.log('Selected size:', sizeItem.textContent.trim());
-            // You might want to update a hidden input or a product object property here
-        };
-    });
-
-    // Add wishlist button functionality
-    document.querySelectorAll('.add-wishlist-btn').forEach(button => {
-        button.onclick = (e) => {
-            e.preventDefault();
-            const productElement = e.target.closest('.product-item');
-            const productId = productElement ? productElement.getAttribute('data-item') : null;
-            if (productId) {
-                console.log('Added to wishlist:', productId);
-                // Toggle active class or change icon to indicate it's in wishlist
-                button.classList.toggle('active');
-                button.querySelector('.ph-heart').classList.toggle('ph-heart-fill'); // Assuming you have a filled heart icon
-                alert(`Product ${productId} added to wishlist!`);
-            }
-        };
-    });
-
-    // Add compare button functionality
-    document.querySelectorAll('.compare-btn').forEach(button => {
-        button.onclick = (e) => {
-            e.preventDefault();
-            const productElement = e.target.closest('.product-item');
-            const productId = productElement ? productElement.getAttribute('data-item') : null;
-            if (productId) {
-                console.log('Added to compare:', productId);
-                // Toggle active class or change icon to indicate it's in compare list
-                button.classList.toggle('active');
-                // You might want to switch between compare-icon and checked-icon
-                const compareIcon = button.querySelector('.compare-icon');
-                const checkedIcon = button.querySelector('.checked-icon');
-                if (compareIcon && checkedIcon) {
-                    compareIcon.classList.toggle('hidden');
-                    checkedIcon.classList.toggle('hidden');
-                }
-                alert(`Product ${productId} added to compare!`);
-            }
-        };
+        });
     });
 }
 

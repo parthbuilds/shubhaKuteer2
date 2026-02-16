@@ -38,10 +38,25 @@ router.post("/verify-payment", (req, res) => {
 router.get("/", async (req, res) => {
     try {
         const [orders] = await pool.query("SELECT * FROM orders ORDER BY id DESC");
-        res.json(orders);
+        res.json({ success: true, orders });
     } catch (err) {
         console.error("DB error:", err);
-        res.status(500).json({ message: "Database error ❌" });
+        res.status(500).json({ success: false, message: "Database error" });
+    }
+});
+
+// 🔹 DELETE /api/orders/:id
+router.delete("/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        const [result] = await pool.query("DELETE FROM orders WHERE id = ?", [id]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+        res.json({ success: true, message: "Order deleted successfully" });
+    } catch (err) {
+        console.error("Delete order error:", err);
+        res.status(500).json({ success: false, message: "Database error" });
     }
 });
 
