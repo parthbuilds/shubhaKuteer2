@@ -268,7 +268,7 @@ async function fetchProductsFromBackend() {
                 color: Array.from(document.querySelectorAll('.filter-color .color-item.active')).map(item => item.getAttribute('data-item')),
                 brand: Array.from(document.querySelectorAll('.filter-brand .brand-item input[type="checkbox"]:checked')).map(item => item.getAttribute('name')),
                 minPrice: 0, //default
-                maxPrice: 300, //default (assuming a max price, adjust as needed based on your data)
+                maxPrice: 5000, //default (matching range input max)
                 sale: document.querySelector('.check-sale input[type="checkbox"]:checked')
             };
 
@@ -307,7 +307,7 @@ async function fetchProductsFromBackend() {
                     } else {
                         // Reset to default range if 'null' is selected from dropdown
                         selectedFilters.minPrice = parseInt(rangeInput[0].min || 0);
-                        selectedFilters.maxPrice = parseInt(rangeInput[1].max || 300); // Adjust default max as per your range input config
+                        selectedFilters.maxPrice = parseInt(rangeInput[1].max || 5000); // Adjust default max as per your range input config
                     }
                 }
             }
@@ -1126,12 +1126,6 @@ window.addEventToProductItem = function addEventToProductItem(products) { // Exp
 }
 
 
-// Initial fetch of products - BUT DO NOT RENDER YET
-// This will just populate allFetchedProducts and window.productsData
-if (productList) {
-    // Call fetchProductsFromBackend, but don't perform initial rendering
-    // The shop.html script will trigger rendering after category filtering.
-    window.fetchProductsFromBackend().catch(err => {
-        console.error("Initial product fetch failed in shop.js", err);
-    });
-}
+// NOTE: Do NOT call fetchProductsFromBackend here.
+// shop.html's loadAndRenderWithCategory() calls it to fetch data AND set up
+// sort/filter listeners, then applies category filtering before rendering.

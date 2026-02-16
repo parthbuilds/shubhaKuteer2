@@ -724,8 +724,8 @@
                                 <div class="progress"></div>
                             </div>
                             <div class="range-input">
-                                <input class="range-min" type="range" min="0" max="300" value="0" />
-                                <input class="range-max" type="range" min="0" max="300" value="300" />
+                                <input class="range-min" type="range" min="0" max="5000" value="0" />
+                                <input class="range-max" type="range" min="0" max="5000" value="5000" />
                             </div>
                             <div class="price-block flex items-center justify-between flex-wrap mt-4">
                                 <div class="min flex items-center gap-1">
@@ -734,7 +734,7 @@
                                 </div>
                                 <div class="min flex items-center gap-1">
                                     <div>Max price:</div>
-                                    <div class="max-price">₹300</div>
+                                    <div class="max-price">₹5000</div>
                                 </div>
                             </div>
                         </div>
@@ -2038,16 +2038,19 @@
                 const url = new URL(window.location.href);
                 const cat = url.searchParams.get('cat'); // e.g. ?cat=bedsheets
 
-                const products = await fetchAllTransformed();
-                let filtered = products;
+                // Use fetchProductsFromBackend to fetch data AND set up sort/filter event listeners
+                await window.fetchProductsFromBackend();
+
+                // All products are now in window.allFetchedProducts
+                let filtered = [...window.allFetchedProducts];
 
                 if (cat && cat.trim() !== '') {
                     const normalizedCat = normalize(cat);
-                    filtered = products.filter(
+                    filtered = window.allFetchedProducts.filter(
                         (p) => normalize(p.category) === normalizedCat
                     );
 
-                    // If no matching products, show nothing (don’t fallback to all)
+                    // If no matching products, show nothing (don't fallback to all)
                     if (filtered.length === 0) {
                         console.warn('No products found for category:', cat);
                         const list = document.querySelector('.list-product-block .list-product');
@@ -2062,13 +2065,14 @@
                         if (pag) pag.innerHTML = '';
                         return;
                     }
+
+                    // Scope allFetchedProducts to this category so sort/filter stay within it
+                    window.allFetchedProducts = filtered;
                 }
 
-                // Update the global product arrays so sorting/filters only operate on current category
-                window.allFetchedProducts = filtered;
                 window.productsData = [...filtered];
 
-                // Render products or all if no category filter
+                // Render products
                 if (typeof renderProducts === 'function') renderProducts(1, filtered);
                 if (typeof renderPagination === 'function') renderPagination(filtered);
                 if (typeof addEventToProductItem === 'function') addEventToProductItem(filtered);
