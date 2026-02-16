@@ -55,7 +55,7 @@ const listPagination = document.querySelector('.list-pagination');
 let currentPage = 1;
 window.productsPerPage = productList ? Number(productList.getAttribute('data-item')) : 12;
 window.productsData = []; // Expose productsData globally
-let allFetchedProducts = []; // Store the initially fetched products
+window.allFetchedProducts = []; // Store the initially fetched products (exposed globally)
 
 // Filer product by type(in breadcrumb and sidebar)
 let selectedType = localStorage.getItem('selectedType');
@@ -206,8 +206,8 @@ async function fetchProductsFromBackend() {
         const data = await response.json();
 
         // Store all fetched products, for initial load and subsequent filtering
-        allFetchedProducts = data.map(window.transformBackendProduct);
-        window.productsData = [...allFetchedProducts]; // Make a copy available globally
+        window.allFetchedProducts = data.map(window.transformBackendProduct);
+        window.productsData = [...window.allFetchedProducts]; // Make a copy available globally
 
         // NOTE: No rendering here. Initial rendering will be handled by shop.html's loadAndRenderWithCategory
 
@@ -313,8 +313,8 @@ async function fetchProductsFromBackend() {
             }
 
             // filter product base on items filtered
-            // IMPORTANT: Filter from `allFetchedProducts` not `window.productsData` to always have the full dataset
-            let filteredProducts = allFetchedProducts.filter(product => {
+            // IMPORTANT: Filter from `window.allFetchedProducts` not `window.productsData` to always have the full dataset
+            let filteredProducts = window.allFetchedProducts.filter(product => {
                 if (selectedFilters.type && selectedFilters.type.length > 0 && product.type !== selectedFilters.type) return false;
                 if (selectedFilters.size && selectedFilters.size.length > 0 && !product.sizes.some(size => selectedFilters.size.includes(size))) return false;
                 // For color filter, we need to check if any variation's color matches
@@ -532,7 +532,7 @@ async function fetchProductsFromBackend() {
             });
 
             if (item.querySelector('.number')) {
-                item.querySelector('.number').innerHTML = allFetchedProducts.filter(product => product.type === item.getAttribute('data-item')).length
+                item.querySelector('.number').innerHTML = window.allFetchedProducts.filter(product => product.type === item.getAttribute('data-item')).length
             }
         });
 
@@ -579,7 +579,7 @@ async function fetchProductsFromBackend() {
 
         brandItems.forEach(item => {
             if (item.querySelector('.number')) {
-                item.querySelector('.number').innerHTML = allFetchedProducts.filter(product => product.brand === item.getAttribute('data-item')).length
+                item.querySelector('.number').innerHTML = window.allFetchedProducts.filter(product => product.brand === item.getAttribute('data-item')).length
             }
         })
 

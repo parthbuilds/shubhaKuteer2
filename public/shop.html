@@ -2064,9 +2064,14 @@
                     }
                 }
 
+                // Update the global product arrays so sorting/filters only operate on current category
+                window.allFetchedProducts = filtered;
+                window.productsData = [...filtered];
+
                 // Render products or all if no category filter
                 if (typeof renderProducts === 'function') renderProducts(1, filtered);
                 if (typeof renderPagination === 'function') renderPagination(filtered);
+                if (typeof addEventToProductItem === 'function') addEventToProductItem(filtered);
 
             } catch (err) {
                 console.error('Error loading products:', err);

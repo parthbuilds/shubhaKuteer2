@@ -3565,8 +3565,8 @@ const renderCheckoutProducts = () => {
                     <span class='px-1'>x</span>
                     <span>₹${product.price.toFixed(2)}</span>
                   </div>
-                  <button class="checkout-remove-btn flex-shrink-0" data-product-id="${product.id}" style="background:none; border:none; cursor:pointer; padding:4px; line-height:1; color:#999; transition:color 0.2s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#999'">
-                    <i class="ph ph-x text-lg"></i>
+                  <button class="checkout-remove-btn flex-shrink-0" data-product-id="${product.id}" style="background:#ef4444; border:none; cursor:pointer; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; transition:background 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">
+                    <i class="ph ph-x" style="font-size:12px;"></i>
                   </button>
                 </div>
               </div>
