@@ -3559,13 +3559,34 @@ const renderCheckoutProducts = () => {
                     <span class='color capitalize'>${displayColor}</span>
                   </div>
                 </div>
-                <div class="text-title">
-                  <span class='quantity'>${product.quantityPurchase}</span>
-                  <span class='px-1'>x</span>
-                  <span>₹${product.price.toFixed(2)}</span>
+                <div class="flex items-center gap-3">
+                  <div class="text-title">
+                    <span class='quantity'>${product.quantityPurchase}</span>
+                    <span class='px-1'>x</span>
+                    <span>₹${product.price.toFixed(2)}</span>
+                  </div>
+                  <button class="checkout-remove-btn flex-shrink-0" data-product-id="${product.id}" style="background:none; border:none; cursor:pointer; padding:4px; line-height:1; color:#999; transition:color 0.2s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#999'">
+                    <i class="ph ph-x text-lg"></i>
+                  </button>
                 </div>
               </div>
             `;
+
+            // Remove item from checkout
+            const removeBtn = productElement.querySelector('.checkout-remove-btn');
+            if (removeBtn) {
+                removeBtn.addEventListener('click', () => {
+                    let cs = localStorage.getItem("cartStore");
+                    cs = cs ? JSON.parse(cs) : [];
+                    cs = cs.filter(p => p.id !== product.id);
+                    localStorage.setItem("cartStore", JSON.stringify(cs));
+                    renderCheckoutProducts();
+                    // Update header cart count
+                    const cartCountEls = document.querySelectorAll('.cart-quantity');
+                    cartCountEls.forEach(el => { el.textContent = cs.length; });
+                });
+            }
+
             listProductCheckout.appendChild(productElement);
             totalCart += (product.price || 0) * (product.quantityPurchase || 0);
         });
