@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shubha Kuteer - Compare Products</title>
+    <link rel="shortcut icon" href="./assets/images/fav.png" type="image/x-icon" />
+    <link rel="stylesheet" href="./assets/css/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="./assets/css/style.css" />
+    <link rel="stylesheet" href="./dist/output-scss.css" />
+    <link rel="stylesheet" href="./dist/output-tailwind.css" />
+    <script src="https://cdn.jsdelivr.net/npm/fuzzysort@latest/fuzzysort.js"></script>
+</head>
+
+<body>
+    <div id="top-nav" class="top-nav style-one bg-black md:h-[44px] h-[30px]">
+        <div class="container mx-auto h-full">
+            <div class="top-nav-main flex justify-between max-md:justify-center h-full">
+                <div class="left-content flex items-center gap-5 max-md:hidden">
+                    <div class="choose-type choose-language flex items-center gap-1.5">
+                        <div class="select relative">
+                            <p class="selected caption2 text-white">English</p>
+                            <ul class="list-option bg-white">
+                                <li data-item="English" class="caption2 active">English</li>
+                                <li data-item="Espana" class="caption2">Espana</li>
+                                <li data-item="France" class="caption2">France</li>
+                            </ul>
+                        </div>
+                        <i class="ph ph-caret-down text-xs text-white"></i>
+                    </div>
+                    <div class="choose-type choose-currency flex items-center gap-1.5">
+                        <div class="select relative">
+                            <p class="selected caption2 text-white">INR</p>
+                            <ul class="list-option bg-white">
+                                <li data-item="INR" class="caption2 active">INR</li>
+                                <li data-item="USD" class="caption2">USD</li>
+                                <li data-item="GBP" class="caption2">GBP</li>
+                            </ul>
+                        </div>
+                        <i class="ph ph-caret-down text-xs text-white"></i>
+                    </div>
+                </div>
+                <div class="text-center text-button-uppercase text-white flex items-center">New customers save 10% with
+                    the code GET10</div>
+                <div class="right-content flex items-center gap-5 max-md:hidden">
+                    <a href="https://www.facebook.com/" target="_blank">
+                        <i class="icon-facebook text-white"></i>
+                    </a>
+                    <a href="https://www.instagram.com/shubhakuteer/" target="_blank">
+                        <i class="icon-instagram text-white"></i>
+                    </a>
+                    <a href="https://www.youtube.com/" target="_blank">
+                        <i class="icon-youtube text-white"></i>
+                    </a>
+                    <a href="https://twitter.com/" target="_blank">
+                        <i class="icon-twitter text-white"></i>
+                    </a>
+                    <a href="https://pinterest.com/" target="_blank">
+                        <i class="icon-pinterest text-white"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Main Header -->
+    <div class="header-menu style-one relative bg-primary w-full h-[120px] md:h-[100px] ">
+        <div class="container mx-auto h-full">
+            <div class="header-main flex items-center justify-between h-full">
+                <div class="menu-mobile-icon lg:hidden flex items-center">
+                    <i class="icon-category text-2xl"></i>
+                </div>
+                <div class="form-search relative z-[1] max-md:hidden max-lg:hidden">
+                    <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 cursor-pointer"></i>
+                    <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="What are you looking for?"
+                    class="h-10 rounded-lg border border-line caption2 w-full max-w-xs pl-9 pr-4"
+                    />
+                    <div id="suggestions" class="absolute top-11 left-0 w-full bg-white border border-gray-200 rounded-lg shadow-md hidden"></div>
+                </div> 
+                <a href="index.html" class="flex items-center absolute left-1/2 -translate-x-1/2">
+                    <img src="./assets/images/logo.svg" alt="Shubha Kuteer Logo"
+                        class="w- h-20 md:w-24 md:h-24 object-cover" />
+                </a>
+                <div class="right flex gap-12 z-[50]">
+                    <div class="list-action flex items-center gap-4">
+                        <div class="user-icon flex items-center justify-center cursor-pointer">
+                            <i class="ph-bold ph-user text-2xl"></i>
+                            <div class="login-popup absolute top-[74px] w-[320px] p-7 rounded-xl bg-white box-shadow-sm"
+                                id="userPopup">
+                                <a href="login.html" id="loginBtn" class="button-main w-full text-center">Login</a>
+                                <button id="logoutBtn"
+                                    class="button-main w-full text-center hidden bg-red-600 hover:bg-red-700">
+                                    Logout
+                                </button>
+                                <div class="text-secondary text-center mt-3 pb-4" id="registerBlock">
+                                    Don't have an account?
+                                    <a href="register.html" class="text-black pl-1 hover:underline">Register</a>
+                                </div>
+                                <div class="pt-3"><a href="my-account.html" class="button-main bg-white text-black border border-black w-full text-center hidden" id="dashboard">Dashboard</a></div>
+                                <div class="bottom mt-4 pt-4 border-t border-line"></div>
+                                <a href="#!" class="body1 hover:underline">Support</a>
+                            </div>
+                        </div>
+
+                        <div class="max-md:hidden wishlist-icon flex items-center relative cursor-pointer">
+                            <i class="ph-bold ph-heart text-2xl"></i>
+                            <span
+                                class="quantity wishlist-quantity absolute -right-1.5 -top-1.5 text-xs text-white bg-black w-4 h-4 flex items-center justify-center rounded-full">0</span>
+                        </div>
+                        <div class="max-md:hidden cart-icon flex items-center relative cursor-pointer">
+                            <i class="ph-bold ph-handbag text-2xl"></i>
+                            <span
+                                class="quantity cart-quantity absolute -right-1.5 -top-1.5 text-xs text-white bg-black w-4 h-4 flex items-center justify-center rounded-full">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Menu -->
+    <div id="header" class="relative w-full">
+        <div class="header-menu style-one relative bg-secondary w-full md:h-[74px] ">
+            <div class="container mx-auto h-full">
+                <div class="header-main flex items-center justify-between h-full">
+                    <div class="menu-main h-full w-screen xl:absolute xl:left-1/2 xl:-translate-x-1/2 max-lg:hidden">
+                        <ul class="flex items-center justify-center gap-8 h-full">
+                            <li class="h-full relative">
+                                <a href="index.html"
+                                    class="text-button-uppercase duration-300 h-full flex items-center justify-center">
+                                    Home</a>
+                            </li>
+                            <li class="h-full">
+                                <a href="new-collection.html"
+                                    class="text-button-uppercase duration-300 h-full flex items-center justify-center">
+                                    New Collection </a>
+                                <div class="mega-menu absolute top-[74px] left-0 bg-primary w-screen">
+                                    <div class="container">
+                                        <div class="flex justify-between py-8">
+                                            <div class="nav-link basis-2/3 grid grid-cols-4 gap-y-8">
+                                                <div class="nav-item">
+                                                    <div class="text-button-uppercase pb-2 text-secondary">Bed Linens</div>
+                                                    <ul>
+                                                        <li><a href="shop.html?cat=bedsheets" class="link text-secondary duration-300 cursor-pointer">Bed Sheets</a></li>
+                                                        <li><a href="shop.html?cat=Dohar%20and%20Quilts" class="link text-secondary duration-300 cursor-pointer">Quilts</a></li>
+                                                        <li><a href="shop.html?cat=bedsheets" class="link text-secondary duration-300 cursor-pointer view-all-btn">View All</a></li>
+                                                    </ul>
+                                                </div>
+                                                <div class="nav-item">
+                                                    <div class="text-button-uppercase pb-2 text-secondary">Dining & Tabletop</div>
+                                                    <ul>
+                                                        <li><a href="shop.html?cat=Table%20Range" class="link text-secondary duration-300 cursor-pointer">Table Cloths</a></li>
+                                                        <li><a href="shop.html?cat=Table%20Range" class="link text-secondary duration-300 cursor-pointer">Table Mat Set</a></li>
+                                                        <li><a href="shop.html?cat=Table%20Range" class="link text-secondary duration-300 view-all-btn">View All</a></li>
+                                                    </ul>
+                                                </div>
+                                                <div class="nav-item">
+                                                    <div class="text-button-uppercase pb-2 text-secondary">Home & Comfort</div>
+                                                    <ul>
+                                                        <li><a href="shop.html?cat=Cushions%20and%20Pillow%20Covers" class="link text-secondary duration-300 cursor-pointer">Cushions</a></li>
+                                                        <li><a href="shop.html?cat=Honeycomb%20Towels" class="link text-secondary duration-300 cursor-pointer">Towels</a></li>
+                                                        <li><a href="shop.html?cat=Honeycomb%20Towels" class="link text-secondary duration-300 view-all-btn">View All</a></li>
+                                                    </ul>
+                                                </div>
+                                                <div class="nav-item">
+                                                    <div class="text-button-uppercase pb-2 text-secondary">Lounge & Apparel</div>
+                                                    <ul>
+                                                        <li><a href="shop.html?cat=Apparels" class="link text-secondary duration-300 cursor-pointer">Kaftans</a></li>
+                                                        <li><a href="shop.html?cat=Apparels" class="link text-secondary duration-300 view-all-btn">View All</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <div class="banner-ads-block pl-2.5 basis-1/3">
+                                                <a href="shop.html?cat=Apparels"
+                                                    class="banner-ads-item bg-linear rounded-2xl relative block overflow-hidden cursor-pointer">
+                                                    <div class="text-content py-14 pl-8 relative z-[1]">
+                                                        <div class="text-button-uppercase text-white bg-red px-2 py-0.5 inline-block rounded-sm">Save upto 30% off</div>
+                                                        <div class="heading6 mt-2">Dive into Savings <br />on Kaftans</div>
+                                                        <div class="body1 mt-3 text-secondary">Starting at <span class="text-red"> ₹999</span></div>
+                                                    </div>
+                                                    <img src="./assets/images/slider/bg2-2.png" alt="bg-img" class="h-full w-auto absolute right-0 top-0 duration-700" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="h-full">
+                                <a href="shop.html"
+                                    class="text-button-uppercase duration-300 h-full flex items-center justify-center">
+                                    Shop
+                                </a>
+                                <div class="mega-menu absolute top-[74px] left-0 bg-white w-screen">
+                                    <div class="container">
+                                        <div class="flex justify-between py-8">
+                                            <div class="nav-link basis-2/3 grid grid-cols-4 gap-8 pr-12">
+                                                <div class="nav-item">
+                                                    <div class="text-button-uppercase pb-2 text-secondary">Bedsheets</div>
+                                                    <ul>
+                                                        <li><a href="https://www.shubhakuteer.in/product-default.html?id=1" class="link text-secondary duration-300">Queen Size Bedsheet</a></li>
+                                                        <li><a href="https://www.shubhakuteer.in/product-default.html?id=2" class="link text-secondary duration-300">King Size Bedsheet</a></li>
+                                                        <li><a href="https://www.shubhakuteer.in/product-default.html?id=3" class="link text-secondary duration-300">Single Bedsheet</a></li>
+                                                    </ul>
+                                                </div>
+                                                <div class="nav-item">
+                                                    <div class="text-button-uppercase pb-2 text-secondary">Honeycomb Towels</div>
+                                                    <ul>
+                                                        <li><a href="https://www.shubhakuteer.in/product-default.html?id=6" class="link text-secondary duration-300">Bath Towel</a></li>
+                                                        <li><a href="https://www.shubhakuteer.in/product-default.html?id=7" class="link text-secondary duration-300">Face Towel</a></li>
+                                                        <li><a href="https://www.shubhakuteer.in/product-default.html?id=8" class="link text-secondary duration-300">Towel Sets</a></li>
+                                                    </ul>
+                                                </div>
+                                                <div class="nav-item">
+                                                    <div class="text-button-uppercase pb-2 text-secondary">Dohar & Quilts</div>
+                                                    <ul>
+                                                        <li><a href="shop.html?cat=Dohar%20and%20Quilts" class="link text-secondary duration-300">Double Dohar</a></li>
+                                                        <li><a href="shop.html?cat=Dohar%20and%20Quilts" class="link text-secondary duration-300">Single Dohar</a></li>
+                                                        <li><a href="shop.html?cat=Dohar%20and%20Quilts" class="link text-secondary duration-300">Double Quilt</a></li>
+                                                    </ul>
+                                                </div>
+                                                <div class="nav-item">
+                                                    <div class="text-button-uppercase pb-2 text-secondary">Table Range</div>
+                                                    <ul>
+                                                        <li><a href="shop.html?cat=Table%20Range" class="link text-secondary duration-300">Table Runner</a></li>
+                                                        <li><a href="shop.html?cat=Table%20Range" class="link text-secondary duration-300">Table Cover</a></li>
+                                                    </ul>
+                                                </div>
+                                                <div class="nav-item">
+                                                    <div class="text-button-uppercase pb-2 text-secondary">Bags & Kits</div>
+                                                    <ul>
+                                                        <li><a href="shop.html?cat=Bags%20and%20Kits" class="link text-secondary duration-300">Duffle Bags</a></li>
+                                                        <li><a href="shop.html?cat=Bags%20and%20Kits" class="link text-secondary duration-300">Tote Bags</a></li>
+                                                        <li><a href="shop.html?cat=Bags%20and%20Kits" class="link text-secondary duration-300">Travel Kits</a></li>
+                                                    </ul>
+                                                </div>
+                                                <div class="nav-item">
+                                                    <div class="text-button-uppercase pb-2 text-secondary">Cushions & Pillow Covers</div>
+                                                    <ul>
+                                                        <li><a href="shop.html?cat=Cushions%20and%20Pillow%20Covers" class="link text-secondary duration-300">Cushions (Set of 5)</a></li>
+                                                        <li><a href="shop.html?cat=Cushions%20and%20Pillow%20Covers" class="link text-secondary duration-300">Pillow Cover</a></li>
+                                                    </ul>
+                                                </div>
+                                                <div class="nav-item">
+                                                    <div class="text-button-uppercase pb-2 text-secondary">Rugs & Curtains</div>
+                                                    <ul>
+                                                        <li><a href="shop.html?cat=Rugs%20and%20Curtains" class="link text-secondary duration-300">Rugs</a></li>
+                                                        <li><a href="shop.html?cat=Rugs%20and%20Curtains" class="link text-secondary duration-300">Curtains</a></li>
+                                                    </ul>
+                                                </div>
+                                                <div class="nav-item">
+                                                    <div class="text-button-uppercase pb-2 text-secondary">Apparels</div>
+                                                    <ul>
+                                                        <li><a href="shop.html?cat=Apparels" class="link text-secondary duration-300">Kaftaan</a></li>
+                                                        <li><a href="shop.html?cat=Apparels" class="link text-secondary duration-300">Night Suits</a></li>
+                                                    </ul>
+                                                </div>
+                                                <div class="nav-item">
+                                                    <div class="text-button-uppercase pb-2 text-secondary">Others</div>
+                                                    <ul>
+                                                        <li><a href="shop.html?cat=Others" class="link text-secondary duration-300">Bedcovers</a></li>
+                                                        <li><a href="shop.html?cat=Others" class="link text-secondary duration-300">Gifting</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <div class="recent-product pl-2.5 basis-1/3">
+                                                <div class="text-button-uppercase pb-2 text-secondary">Recent Products</div>
+                                                <div class="list-product two-product hide-product-sold grid grid-cols-2 gap-5 mt-3" data-item="kaftans">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="h-full relative">
+                                <a href="about.html"
+                                    class="text-button-uppercase duration-300 h-full flex items-center justify-center">
+                                    About Us </a>
+                            </li>
+                            <li class="h-full relative">
+                                <a href="contact.html"
+                                    class="text-button-uppercase duration-300 h-full flex items-center justify-center">
+                                    Contact Us </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Mobile -->
+    <div id="menu-mobile" class="">
+        <div class="menu-container bg-white h-full">
+            <div class="container h-full">
+                <div class="menu-main h-full overflow-hidden">
+                    <div class="heading py-2 relative flex items-center justify-center">
+                        <div class="close-menu-mobile-btn absolute left-0 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-surface flex items-center justify-center">
+                            <i class="ph ph-x text-sm"></i>
+                        </div>
+                        <a href="index.html" class="logo text-3xl font-semibold text-center">Shubha Kuteer</a>
+                    </div>
+                    <div class="list-nav mt-6">
+                        <ul>
+                            <li><a href="index.html" class="text-xl font-semibold flex items-center justify-between">Home <span class="text-right"><i class="ph ph-caret-right text-xl"></i></span></a></li>
+                            <li><a href="new-collection.html" class="text-xl font-semibold flex items-center justify-between mt-5">New Collections <span class="text-right"><i class="ph ph-caret-right text-xl"></i></span></a></li>
+                            <li><a href="shop.html" class="text-xl font-semibold flex items-center justify-between mt-5">Shop <span class="text-right"><i class="ph ph-caret-right text-xl"></i></span></a></li>
+                            <li><a href="about.html" class="text-xl font-semibold flex items-center justify-between mt-5">About Us <span class="text-right"><i class="ph ph-caret-right text-xl"></i></span></a></li>
+                            <li><a href="contact.html" class="text-xl font-semibold flex items-center justify-between mt-5">Contact Us <span class="text-right"><i class="ph ph-caret-right text-xl"></i></span></a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu bar -->
+    <div class="menu_bar fixed bg-white bottom-0 left-0 w-full h-[70px] sm:hidden">
+        <div class="menu_bar-inner grid grid-cols-4 items-center h-full">
+            <a href="index.html" class="menu_bar-link flex flex-col items-center gap-1">
+                <span class="ph-bold ph-house text-2xl block"></span>
+                <span class="menu_bar-title caption2 font-semibold">Home</span>
+            </a>
+            <a href="new-collection.html" class="menu_bar-link flex flex-col items-center gap-1">
+                <span class="ph-bold ph-list text-2xl block"></span>
+                <span class="menu_bar-title caption2 font-semibold">Category</span>
+            </a>
+            <a href="shop.html" class="menu_bar-link flex flex-col items-center gap-1">
+                <span class="ph-bold ph-magnifying-glass text-2xl block"></span>
+                <span class="menu_bar-title caption2 font-semibold">Search</span>
+            </a>
+            <a href="cart.html" class="menu_bar-link flex flex-col items-center gap-1">
+                <div class="cart-icon relative">
+                    <span class="ph-bold ph-handbag text-2xl block"></span>
+                    <span class="quantity cart-quantity absolute -right-1.5 -top-1.5 text-xs text-white bg-black w-4 h-4 flex items-center justify-center rounded-full">0</span>
+                </div>
+                <span class="menu_bar-title caption2 font-semibold">Cart</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Breadcrumb -->
+    <div class="slider-block style-nine w-full px-4 xl:py-[100px] md:py-20 py-14">
+        <div class="h-full w-full flex items-center justify-center">
+            <div class="text-content text-center">
+                <div class="heading2 text-center">Compare Products</div>
+                <div class="link flex items-center justify-center gap-1 caption1 mt-3 text-secondary">
+                    <a href="index.html">Homepage</a>
+                    <i class="ph ph-caret-right text-sm text-secondary2"></i>
+                    <div class="text-secondary2 capitalize">Compare Products</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compare Section -->
+    <div class="compare-block lg:py-20 md:py-14 py-10">
+        <div class="container">
+            <div class="content-main">
+                <div class="flex items-center justify-between mb-8">
+                    <div class="heading5">Compare Products</div>
+                    <button class="clear-compare-btn button-main bg-white text-black border border-black" onclick="localStorage.setItem('compareStore', JSON.stringify([])); location.reload();">Clear All</button>
+                </div>
+
+                <div class="compare-table w-full overflow-x-auto">
+                    <div class="list-product border border-line rounded-xl overflow-hidden">
+                        <!-- Product Images Row -->
+                        <div class="flex border-b border-line">
+                            <div class="left flex-shrink-0 w-[160px] md:w-[200px] flex items-center justify-center p-4 bg-surface border-r border-line">
+                                <div class="text-button-uppercase text-secondary">Products</div>
+                            </div>
+                            <div class="right flex flex-grow"></div>
+                        </div>
+
+                        <!-- Rating Row -->
+                        <table class="w-full">
+                            <tr class="list-rate-block border-b border-line">
+                                <td class="flex-shrink-0 w-[160px] md:w-[200px] p-4 bg-surface border-r border-line">
+                                    <div class="text-button-uppercase text-secondary text-center">Rating</div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Price Row -->
+                        <table class="w-full">
+                            <tr class="list-price-block border-b border-line">
+                                <td class="flex-shrink-0 w-[160px] md:w-[200px] p-4 bg-surface border-r border-line">
+                                    <div class="text-button-uppercase text-secondary text-center">Price</div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Type Row -->
+                        <table class="w-full">
+                            <tr class="list-type-block border-b border-line">
+                                <td class="flex-shrink-0 w-[160px] md:w-[200px] p-4 bg-surface border-r border-line">
+                                    <div class="text-button-uppercase text-secondary text-center">Type</div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Brand Row -->
+                        <table class="w-full">
+                            <tr class="list-brand-block border-b border-line">
+                                <td class="flex-shrink-0 w-[160px] md:w-[200px] p-4 bg-surface border-r border-line">
+                                    <div class="text-button-uppercase text-secondary text-center">Brand</div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Size Row -->
+                        <table class="w-full">
+                            <tr class="list-size-block border-b border-line">
+                                <td class="flex-shrink-0 w-[160px] md:w-[200px] p-4 bg-surface border-r border-line">
+                                    <div class="text-button-uppercase text-secondary text-center">Size</div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Color Row -->
+                        <table class="w-full">
+                            <tr class="list-color-block">
+                                <td class="flex-shrink-0 w-[160px] md:w-[200px] p-4 bg-surface border-r border-line">
+                                    <div class="text-button-uppercase text-secondary text-center">Color</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Add more products CTA -->
+                <div class="flex items-center justify-center mt-10 gap-4">
+                    <a href="shop.html" class="button-main">Continue Shopping</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Footer-->
+    <div id="footer" class="footer">
+        <div class="footer-main bg-secondary text-surface"
+            style="background-image: url(/assets/images/background/brown-fabric-FX.png); background-size: cover; background-position: center; background-repeat: no-repeat;">
+            <div class="container">
+                <div class="content-footer md:py-[60px] py-10 flex justify-between flex-wrap gap-y-8">
+                    <div class="company-infor basis-1/4 max-lg:basis-full pr-7">
+                        <a href="index.html" class="logo inline-block">
+                            <img src="./assets/images/Footer-Logo.svg" alt="Footer Banner"
+                                class="w-full mb-8 rounded-lg" />
+                        </a>
+                        <div class="info flex gap-3 mt-3">
+                            <div class="flex flex-col">
+                                <span class="text-button">Mail:</span>
+                                <span class="text-button mt-3">Phone:</span>
+                                <span class="text-button mt-3">Address:</span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="">shubhakuteer@gmail.com</span>
+                                <span class="mt-[14px]">+91 8764170000</span>
+                                <span class="mt-3 pt-1">Shanti Residency, A9/10, Ayodhya Nagar, Gandhi Path West,
+                                    Vaishali Nagar, Jaipur - 302021</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="right-content flex flex-wrap gap-y-8 basis-3/4 max-lg:basis-full">
+                        <div class="list-nav flex justify-between basis-2/3 max-md:basis-full gap-4">
+                            <div class="item flex flex-col basis-1/3">
+                                <div class="text-button-uppercase pb-3">Information</div>
+                                <a class="caption1 has-line-before duration-300 w-fit" href="contact.html">Contact us</a>
+                                <a class="caption1 has-line-before duration-300 w-fit pt-2" href="#!">Career</a>
+                                <a class="caption1 has-line-before duration-300 w-fit pt-2" href="my-account.html">My Account</a>
+                                <a class="caption1 has-line-before duration-300 w-fit pt-2" href="order-tracking.html">Order & Returns</a>
+                                <a class="caption1 has-line-before duration-300 w-fit pt-2" href="faqs.html">FAQs</a>
+                            </div>
+                            <div class="item flex flex-col basis-1/3">
+                                <div class="text-button-uppercase pb-3">Quick Shop</div>
+                                <a class="caption1 has-line-before duration-300 w-fit" href="shop.html?cat=Apparels">Kaftans</a>
+                                <a class="caption1 has-line-before duration-300 w-fit pt-2" href="shop.html?cat=Bags%20and%20Kits">Travel Kits</a>
+                                <a class="caption1 has-line-before duration-300 w-fit pt-2" href="shop.html?cat=Bags%20and%20Kits">Hand Bags</a>
+                                <a class="caption1 has-line-before duration-300 w-fit pt-2" href="shop.html">Pillow Covers</a>
+                            </div>
+                            <div class="item flex flex-col basis-1/3">
+                                <div class="text-button-uppercase pb-3">Customer Services</div>
+                                <a class="caption1 has-line-before duration-300 w-fit" href="faqs.html">FAQs</a>
+                                <a class="caption1 has-line-before duration-300 w-fit pt-2" href="faqs.html">Shipping</a>
+                                <a class="caption1 has-line-before duration-300 w-fit pt-2" href="faqs.html">Privacy Policy</a>
+                                <a class="caption1 has-line-before duration-300 w-fit pt-2" href="faqs.html">Return & Refund</a>
+                            </div>
+                        </div>
+                        <div class="newsletter basis-1/3 pl-7 max-md:basis-full max-md:pl-0">
+                            <div class="text-button-uppercase">Follow Us:</div>
+                            <div class="caption1 mt-3">Sign up for our newsletter and get 10% off your first purchase</div>
+                            <div class="list-social flex items-center gap-6 mt-4">
+                                <a href="https://www.facebook.com/" target="_blank"><div class="icon-facebook text-2xl"></div></a>
+                                <a href="https://www.instagram.com/" target="_blank"><div class="icon-instagram text-2xl"></div></a>
+                                <a href="https://www.twitter.com/" target="_blank"><div class="icon-twitter text-2xl"></div></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom py-3 flex items-center justify-between gap-5 max-lg:justify-center max-lg:flex-col border-t border-line">
+                    <div class="left flex items-center gap-8">
+                        <div class="copyright caption1">©2024 Shubha Kuteer. All Rights Reserved.</div>
+                        <div class="select-block flex items-center gap-5 max-md:hidden">
+                            <div class="choose-language flex items-center gap-1.5">
+                                <select name="language" id="chooseLanguageFooter" class="caption2 bg-transparent">
+                                    <option value="English">English</option>
+                                    <option value="Espana">Espana</option>
+                                    <option value="France">France</option>
+                                </select>
+                                <i class="ph ph-caret-down text-xs text-[#1F1F1F]"></i>
+                            </div>
+                            <div class="choose-currency flex items-center gap-1.5">
+                                <select name="currency" id="chooseCurrencyFooter" class="caption2 bg-transparent">
+                                    <option value="INR">INR</option>
+                                    <option value="USD">USD</option>
+                                    <option value="GBP">GBP</option>
+                                </select>
+                                <i class="ph ph-caret-down text-xs text-[#1F1F1F]"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="right flex items-center gap-2">
+                        <div class="caption1 text-primary">Payment:</div>
+                        <div class="payment-img"><img src="./assets/images/payment/Frame-0.png" alt="payment" class="w-9" /></div>
+                        <div class="payment-img"><img src="./assets/images/payment/Frame-1.png" alt="payment" class="w-9" /></div>
+                        <div class="payment-img"><img src="./assets/images/payment/Frame-2.png" alt="payment" class="w-9" /></div>
+                        <div class="payment-img"><img src="./assets/images/payment/Frame-3.png" alt="payment" class="w-9" /></div>
+                        <div class="payment-img"><img src="./assets/images/payment/Frame-4.png" alt="payment" class="w-9" /></div>
+                        <div class="payment-img"><img src="./assets/images/payment/Frame-5.png" alt="payment" class="w-9" /></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a class="scroll-to-top-btn" href="#top-nav"><i class="ph-bold ph-caret-up"></i></a>
+
+    <!-- Modal Wishlist -->
+    <div class="modal-wishlist-block">
+        <div class="modal-wishlist-main py-6">
+            <div class="close-btn absolute 2xl:right-6 right-4 2xl:top-6 md:-top-4 top-3 lg:w-10 w-6 lg:h-10 h-6 rounded-full bg-surface flex items-center justify-center duration-300 cursor-pointer hover:bg-black hover:text-white">
+                <i class="ph ph-x body1"></i>
+            </div>
+            <div class="container h-full flex items-center w-full">
+                <div class="content-main flex items-center justify-between xl:gap-10 gap-6 w-full max-md:flex-wrap">
+                    <div class="heading5 flex-shrink-0 max-md:w-full">Wishlist</div>
+                    <div class="list-product flex items-center w-full gap-4"></div>
+                    <div class="block-button flex flex-col gap-4 flex-shrink-0">
+                        <a href="wishlist.html" class="button-main whitespace-nowrap">View All Wishlist</a>
+                    </div>
+                </div>
+            </div>
+            <div class="list-product px-6"></div>
+            <div class="footer-modal p-6 border-t bg-white border-line absolute bottom-0 left-0 w-full text-center">
+                <a href="wishlist.html" class="button-main w-full text-center uppercase">View All Wish List</a>
+                <div class="text-button-uppercase continue mt-4 text-center has-line-before cursor-pointer inline-block text-secondary">Or continue shopping</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Cart -->
+    <div class="modal-cart-block">
+        <div class="modal-cart-main flex">
+            <div class="right cart-block md:w-1/2 w-full py-6 relative overflow-hidden">
+                <div class="heading px-6 pb-3 flex items-center justify-between relative">
+                    <div class="heading5">Shopping Cart</div>
+                    <div class="close-btn absolute right-6 top-0 w-6 h-6 rounded-full bg-surface flex items-center justify-center duration-300 cursor-pointer hover:bg-black hover:text-white">
+                        <i class="ph ph-x text-sm"></i>
+                    </div>
+                </div>
+                <div class="time countdown-cart px-6">
+                    <div class="flex items-center gap-3 px-5 py-3 bg-green rounded-lg">
+                        <p class="text-3xl">🔥</p>
+                        <div class="caption1">
+                            Your cart will expire in <span class="text-red caption1 font-semibold"><span class="minute">04</span>:<span class="second">59</span></span> minutes!<br />
+                            Please checkout now before your items sell out!
+                        </div>
+                    </div>
+                </div>
+                <div class="heading banner mt-3 px-6">
+                    <div class="text">
+                        Buy <span class="text-button">₹<span class="more-price">2000</span>.00 </span>
+                        <span>more to get </span>
+                        <span class="text-button">freeship</span>
+                    </div>
+                    <div class="tow-bar-block mt-3">
+                        <div class="progress-line"></div>
+                    </div>
+                </div>
+                <div class="list-product px-6"></div>
+                <div class="footer-modal bg-white absolute bottom-0 left-0 w-full">
+                    <div class="flex items-center justify-center lg:gap-14 gap-8 px-6 py-4 border-b border-line">
+                        <div class="note-btn item flex items-center gap-3 cursor-pointer">
+                            <i class="ph ph-note-pencil text-xl"></i>
+                            <div class="caption1 text-secondary">Note</div>
+                        </div>
+                        <div class="shipping-btn item flex items-center gap-3 cursor-pointer">
+                            <i class="ph ph-truck text-xl"></i>
+                            <div class="caption1 text-secondary">Shipping</div>
+                        </div>
+                        <div class="coupon-btn item flex items-center gap-3 cursor-pointer">
+                            <i class="ph ph-tag text-xl"></i>
+                            <div class="caption1 text-secondary">Coupon</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between pt-6 px-6">
+                        <div class="heading5">Subtotal</div>
+                        <div class="heading5 total-cart">₹0.00</div>
+                    </div>
+                    <div class="block-button text-center p-6">
+                        <div class="flex items-center gap-4">
+                            <a href="cart.html" class="button-main basis-1/2 bg-white border border-black text-black text-center uppercase">View cart</a>
+                            <a href="checkout.html" class="button-main basis-1/2 text-center uppercase">Check Out</a>
+                        </div>
+                        <div class="text-button-uppercase continue mt-4 text-center has-line-before cursor-pointer inline-block text-secondary">Or continue shopping</div>
+                    </div>
+                    <div class="tab-item note-block">
+                        <div class="px-6 py-4 border-b border-line">
+                            <div class="item flex items-center gap-3 cursor-pointer">
+                                <i class="ph ph-note-pencil text-xl"></i>
+                                <div class="caption1 text-secondary">Note</div>
+                            </div>
+                        </div>
+                        <div class="form pt-4 px-6">
+                            <textarea name="form-note" id="form-note" rows="4" placeholder="Add special instructions for your order..." class="caption1 py-3 px-4 bg-surface border-line rounded-md w-full"></textarea>
+                        </div>
+                        <div class="block-button text-center pt-4 px-6 pb-6">
+                            <div class="button-main w-full text-center">Save</div>
+                            <div class="cancel-btn text-button-uppercase mt-4 text-center has-line-before cursor-pointer inline-block">Cancel</div>
+                        </div>
+                    </div>
+                    <div class="tab-item shipping-block">
+                        <div class="px-6 py-4 border-b border-line">
+                            <div class="item flex items-center gap-3 cursor-pointer">
+                                <i class="ph ph-truck text-xl"></i>
+                                <div class="caption1">Estimate shipping rates</div>
+                            </div>
+                        </div>
+                        <div class="form pt-4 px-6">
+                            <div class="">
+                                <label for="select-country" class="caption1 text-secondary">Country/region</label>
+                                <div class="select-block relative mt-2">
+                                    <select id="select-country" name="select-country" class="w-full py-3 pl-5 rounded-xl bg-white border border-line">
+                                        <option value="India">India</option>
+                                    </select>
+                                    <i class="ph ph-caret-down text-xs absolute top-1/2 -translate-y-1/2 md:right-5 right-2"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="block-button text-center pt-4 px-6 pb-6">
+                            <div class="button-main w-full text-center">Calculator</div>
+                            <div class="cancel-btn text-button-uppercase mt-4 text-center has-line-before cursor-pointer inline-block">Cancel</div>
+                        </div>
+                    </div>
+                    <div class="tab-item coupon-block">
+                        <div class="px-6 py-4 border-b border-line">
+                            <div class="item flex items-center gap-3 cursor-pointer">
+                                <i class="ph ph-tag text-xl"></i>
+                                <div class="caption1">Add A Coupon Code</div>
+                            </div>
+                        </div>
+                        <div class="form pt-4 px-6">
+                            <div class="">
+                                <label for="select-discount" class="caption1 text-secondary">Enter Code</label>
+                                <input class="border-line px-5 py-3 w-full rounded-xl mt-3" id="select-discount" type="text" placeholder="Discount code" />
+                            </div>
+                        </div>
+                        <div class="block-button text-center pt-4 px-6 pb-6">
+                            <div class="button-main w-full text-center">Apply</div>
+                            <div class="cancel-btn text-button-uppercase mt-4 text-center has-line-before cursor-pointer inline-block">Cancel</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Compare -->
+    <div class="modal-compare-block">
+        <div class="modal-compare-main py-6">
+            <div class="close-btn absolute 2xl:right-6 right-4 2xl:top-6 md:-top-4 top-3 lg:w-10 w-6 lg:h-10 h-6 rounded-full bg-surface flex items-center justify-center duration-300 cursor-pointer hover:bg-black hover:text-white">
+                <i class="ph ph-x body1"></i>
+            </div>
+            <div class="container h-full flex items-center w-full">
+                <div class="content-main flex items-center justify-between xl:gap-10 gap-6 w-full max-md:flex-wrap">
+                    <div class="heading5 flex-shrink-0 max-md:w-full">Compare <br class="max-md:hidden" />Products</div>
+                    <div class="list-product flex items-center w-full gap-4"></div>
+                    <div class="block-button flex flex-col gap-4 flex-shrink-0">
+                        <a href="compare.html" class="button-main whitespace-nowrap">Compare Products</a>
+                        <div class="button-main clear whitespace-nowrap border border-black bg-white text-black">Clear All Products</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Quickview -->
+    <div class="modal-quickview-block">
+        <div class="modal-quickview-main py-6">
+            <div class="flex h-full max-md:flex-col-reverse gap-y-6">
+                <div class="left lg:w-[388px] md:w-[300px] flex-shrink-0 px-6">
+                    <div class="list-img max-md:flex items-center gap-4">
+                        <div class="bg-img w-full aspect-[3/4] max-md:w-[150px] max-md:flex-shrink-0 rounded-[20px] overflow-hidden md:mt-6">
+                            <img src="/assets/images/product/productDefault.png" alt="item" class="w-full h-full object-cover" />
+                        </div>
+                    </div>
+                </div>
+                <div class="right w-full px-6">
+                    <div class="heading pb-6 flex items-center justify-between relative">
+                        <div class="heading5">Quick View</div>
+                        <div class="close-btn absolute right-0 top-0 w-6 h-6 rounded-full bg-surface flex items-center justify-center duration-300 cursor-pointer hover:bg-black hover:text-white">
+                            <i class="ph ph-x text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="product-infor">
+                        <div class="flex justify-between">
+                            <div>
+                                <div class="category caption2 text-secondary font-semibold uppercase">fashion</div>
+                                <div class="name heading4 mt-1 text-secondary">Product Name</div>
+                            </div>
+                            <div class="add-wishlist-btn w-10 h-10 flex items-center justify-center border border-line cursor-pointer rounded-lg duration-300 hover:bg-black hover:text-white">
+                                <i class="ph ph-heart text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 flex-wrap mt-5 pb-6 border-b border-line">
+                            <div class="product-price heading5">₹0.00</div>
+                            <div class="w-px h-4 bg-line"></div>
+                            <div class="product-origin-price font-normal text-secondary2"><del>₹0.00</del></div>
+                        </div>
+                        <div class="list-action mt-6">
+                            <div class="choose-quantity flex items-center max-xl:flex-wrap lg:justify-between gap-5 mt-3">
+                                <div class="add-cart-btn button-main whitespace-nowrap w-full text-center bg-white text-black border border-black">Add To Cart</div>
+                            </div>
+                            <div class="button-block mt-5">
+                                <a href="checkout.html" class="button-main w-full text-center">Buy It Now</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./assets/js/login.js"></script>
+    <script src="./assets/js/phosphor-icons.js"></script>
+    <script src="./assets/js/swiper-bundle.min.js"></script>
+    <script src="./assets/js/main.js"></script>
+    <script src="./assets/js/search.js"></script>
+</body>
+
+</html>
