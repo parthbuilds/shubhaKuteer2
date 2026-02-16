@@ -879,7 +879,7 @@
                                 class="overview-item flex items-center justify-between p-5 border border-line rounded-lg box-shadow-xs">
                                 <div class="counter">
                                     <span class="text-secondary">Awaiting Pickup</span>
-                                    <h5 class="heading5 mt-1"></h5>
+                                    <h5 class="heading5 mt-1" id="awaitingPickupCount">0</h5>
                                 </div>
                                 <span class="ph ph-hourglass-medium text-4xl"></span>
                             </div>
@@ -887,7 +887,7 @@
                                 class="overview-item flex items-center justify-between p-5 border border-line rounded-lg box-shadow-xs">
                                 <div class="counter">
                                     <span class="text-secondary">Cancelled Orders</span>
-                                    <h5 class="heading5 mt-1"></h5>
+                                    <h5 class="heading5 mt-1" id="cancelledOrdersCount">0</h5>
                                 </div>
                                 <span class="ph ph-receipt-x text-4xl"></span>
                             </div>
@@ -895,7 +895,7 @@
                                 class="overview-item flex items-center justify-between p-5 border border-line rounded-lg box-shadow-xs">
                                 <div class="counter">
                                     <span class="text-secondary">Total Number of Orders</span>
-                                    <h5 class="heading5 mt-1"></h5>
+                                    <h5 class="heading5 mt-1" id="totalOrdersCount">0</h5>
                                 </div>
                                 <span class="ph ph-package text-4xl"></span>
                             </div>
@@ -1036,7 +1036,7 @@
                     </div>
                     <div class="filter-item tab_address text-content w-full p-7 border border-line rounded-xl"
                         data-item="address">
-                        <form>
+                        <form id="addressForm">
                             <!-- Shipping Address Section -->
                             <div class="heading5 pb-4">Shipping address</div>
                             <!-- Changed from heading6 and moved to align with Information section styling -->
@@ -1112,7 +1112,7 @@
                         </form>
                     </div>
                     <div class="filter-item text-content w-full p-7 border border-line rounded-xl" data-item="setting">
-                        <form>
+                        <form id="settingForm">
                             <div class="heading5 pb-4">Information</div>
 
                             <div class="grid sm:grid-cols-2 gap-4 gap-y-5 mt-5">
@@ -1120,25 +1120,25 @@
                                     <label for="firstName" class="form-caption capitalize">First Name <span
                                             class="text-red">*</span></label>
                                     <input class="border-line mt-2 px-4 py-3 w-full rounded-lg" id="firstName"
-                                        type="text" value="Tony" placeholder="First name" required />
+                                        type="text" value="" placeholder="First name" required />
                                 </div>
                                 <div class="last-name">
                                     <label for="lastName" class="form-caption capitalize">Last Name <span
                                             class="text-red">*</span></label>
                                     <input class="border-line mt-2 px-4 py-3 w-full rounded-lg" id="lastName"
-                                        type="text" value="Nguyen" placeholder="Last name" required />
+                                        type="text" value="" placeholder="Last name" required />
                                 </div>
                                 <div class="phone-number">
                                     <label for="phoneNumber" class="form-caption capitalize">Phone Number <span
                                             class="text-red">*</span></label>
                                     <input class="border-line mt-2 px-4 py-3 w-full rounded-lg" id="phoneNumber"
-                                        type="text" value="(+12) 345 678 910" placeholder="Phone number" required />
+                                        type="text" value="" placeholder="Phone number" required />
                                 </div>
                                 <div class="email">
                                     <label for="email" class="form-caption capitalize">Email Address <span
                                             class="text-red">*</span></label>
-                                    <input class="border-line mt-2 px-4 py-3 w-full rounded-lg" id="email" type="email"
-                                        value="shubhakuteer@gmail.com" placeholder="Email address" required />
+                                    <input class="border-line mt-2 px-4 py-3 w-full rounded-lg" id="settingEmail" type="email"
+                                        value="" placeholder="Email address" required />
                                 </div>
                                 <!-- <div class="gender">
                                     <label for="gender" class="form-caption capitalize">Gender <span
@@ -1165,8 +1165,8 @@
                             <div class="pass">
                                 <label for="password" class="form-caption">Current password <span
                                         class="text-red">*</span></label>
-                                <input class="border-line mt-2 px-4 py-3 w-full rounded-lg" id="password"
-                                    type="password" placeholder="Password *" required />
+                                <input class="border-line mt-2 px-4 py-3 w-full rounded-lg" id="currentPassword"
+                                    type="password" placeholder="Password *" />
                             </div>
                             <div class="new-pass mt-5">
                                 <label for="newPassword" class="form-caption">New password <span
@@ -1181,7 +1181,8 @@
                                     type="password" placeholder="Confirm Password *" required />
                             </div>
                             <div class="block-button lg:mt-10 mt-6">
-                                <button class="button-main">Save Change</button>
+                                <button type="submit" class="button-main">Save Change</button>
+                                <span id="settingMessage" class="ml-3"></span>
                             </div>
                         </form>
                     </div>

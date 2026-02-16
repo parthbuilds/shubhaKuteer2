@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const apiOrdersUrl = "https://www.shubhakuteer.in/api/orders";
+        const apiOrdersUrl = "/api/orders";
 
         try {
             const response = await fetch(apiOrdersUrl);
@@ -285,7 +285,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             const res = await fetch(
-                `https://www.shubhakuteer.in/api/orders/cancel-order`,
+                `/api/orders/cancel-order`,
                 {
                     method: "POST",
                     headers: {
@@ -324,12 +324,149 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // --- Load user profile and pre-fill Setting form ---
+    async function loadUserProfile() {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        try {
+            const res = await fetch("/api/user/profile", {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (!res.ok) return;
+            const data = await res.json();
+            const user = data.user;
+
+            if (user) {
+                const firstNameEl = document.getElementById("firstName");
+                const lastNameEl = document.getElementById("lastName");
+                const phoneNumberEl = document.getElementById("phoneNumber");
+                const settingEmailEl = document.getElementById("settingEmail");
+
+                if (firstNameEl) firstNameEl.value = user.first_name || "";
+                if (lastNameEl) lastNameEl.value = user.last_name || "";
+                if (phoneNumberEl) phoneNumberEl.value = user.phone_number || "";
+                if (settingEmailEl) settingEmailEl.value = user.email || "";
+            }
+        } catch (err) {
+            console.error("Error loading user profile:", err);
+        }
+    }
+
+    // --- Setting form submission (profile update + password change) ---
+    const settingForm = document.getElementById("settingForm");
+    if (settingForm) {
+        settingForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem("token");
+            const msgEl = document.getElementById("settingMessage");
+            if (!token) {
+                if (msgEl) { msgEl.textContent = "Please log in first."; msgEl.style.color = "red"; }
+                return;
+            }
+
+            const submitBtn = settingForm.querySelector('button[type="submit"]');
+            if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Saving..."; }
+            if (msgEl) { msgEl.textContent = ""; }
+
+            try {
+                // 1. Update profile info
+                const profileRes = await fetch("/api/user/profile", {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        first_name: document.getElementById("firstName").value.trim(),
+                        last_name: document.getElementById("lastName").value.trim(),
+                        phone_number: document.getElementById("phoneNumber").value.trim(),
+                        email: document.getElementById("settingEmail").value.trim()
+                    })
+                });
+                const profileData = await profileRes.json();
+                if (!profileRes.ok) throw new Error(profileData.message || "Failed to update profile.");
+
+                // Update localStorage with new name/email
+                const newName = `${document.getElementById("firstName").value.trim()} ${document.getElementById("lastName").value.trim()}`.trim();
+                localStorage.setItem("userName", newName);
+                localStorage.setItem("userEmail", document.getElementById("settingEmail").value.trim());
+                if (userNameDisplay) userNameDisplay.textContent = newName;
+                if (userEmailDisplay) userEmailDisplay.textContent = document.getElementById("settingEmail").value.trim();
+
+                // 2. Change password if fields are filled
+                const currentPwd = document.getElementById("currentPassword").value;
+                const newPwd = document.getElementById("newPassword").value;
+                const confirmPwd = document.getElementById("confirmPassword").value;
+
+                if (currentPwd && newPwd) {
+                    if (newPwd !== confirmPwd) {
+                        if (msgEl) { msgEl.textContent = "Profile updated, but new passwords don't match."; msgEl.style.color = "orange"; }
+                        return;
+                    }
+                    const pwdRes = await fetch("/api/user/password", {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            current_password: currentPwd,
+                            new_password: newPwd,
+                            confirm_new_password: confirmPwd
+                        })
+                    });
+                    const pwdData = await pwdRes.json();
+                    if (!pwdRes.ok) throw new Error(pwdData.message || "Failed to change password.");
+
+                    // Clear password fields
+                    document.getElementById("currentPassword").value = "";
+                    document.getElementById("newPassword").value = "";
+                    document.getElementById("confirmPassword").value = "";
+
+                    if (msgEl) { msgEl.textContent = "Profile and password updated!"; msgEl.style.color = "green"; }
+                } else {
+                    if (msgEl) { msgEl.textContent = "Profile updated!"; msgEl.style.color = "green"; }
+                }
+            } catch (err) {
+                console.error("Setting save error:", err);
+                if (msgEl) { msgEl.textContent = err.message; msgEl.style.color = "red"; }
+            } finally {
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "Save Change"; }
+            }
+        });
+    }
+
+    // --- Address form submission (save to localStorage) ---
+    const addressForm = document.getElementById("addressForm");
+    if (addressForm) {
+        // Load saved address from localStorage
+        const savedAddress = JSON.parse(localStorage.getItem("shippingAddress") || "{}");
+        const addressFields = ["shippingFirstName", "shippingLastName", "shippingCompany", "shippingCountry", "shippingStreet", "shippingCity", "shippingState", "shippingZip", "shippingPhone", "shippingEmail"];
+        addressFields.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && savedAddress[id]) el.value = savedAddress[id];
+        });
+
+        addressForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const addressData = {};
+            addressFields.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) addressData[id] = el.value.trim();
+            });
+            localStorage.setItem("shippingAddress", JSON.stringify(addressData));
+            alert("Address saved successfully!");
+        });
+    }
+
     // --- Initial setup on DOMContentLoaded ---
     if (isLoggedIn === "true" && storedUserEmail) {
         if (userNameDisplay) userNameDisplay.textContent = storedUserName || "Guest User";
         if (userEmailDisplay) userEmailDisplay.textContent = storedUserEmail || "No Email";
         console.log("User is logged in. Loading orders...");
         fetchAndRenderUserOrders();
+        loadUserProfile();
     } else {
         // Fallback for not logged in
         if (userNameDisplay) userNameDisplay.textContent = "";

@@ -1642,7 +1642,7 @@ export default async function handler(req, res) {
                 try {
                     // 1. Fetch user basic data from the 'users' table
                     const [userRows] = await pool.default.query(
-                        "SELECT id, name, email FROM users WHERE id = ?",
+                        "SELECT id, name, email, phone FROM users WHERE id = ?",
                         [userId]
                     );
 
@@ -1694,7 +1694,7 @@ export default async function handler(req, res) {
                             email: user.email,
                             // If you have phone_number/dob in your 'users' table, fetch them here.
                             // Otherwise, they will remain empty in the profile data.
-                            phone_number: '',
+                            phone_number: user.phone || '',
                             dob: ''
                         },
                         orders: ordersWithParsedProducts
@@ -1714,8 +1714,8 @@ export default async function handler(req, res) {
                 }
                 try {
                     const [result] = await pool.default.query(
-                        "UPDATE users SET name = ?, email = ? WHERE id = ?",
-                        [fullName, email, userId]
+                        "UPDATE users SET name = ?, email = ?, phone = ? WHERE id = ?",
+                        [fullName, email, phone_number || null, userId]
                     );
                     if (result.affectedRows === 0) {
                         return res.status(404).json({ message: "User not found ❌" });
