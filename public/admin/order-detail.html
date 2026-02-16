@@ -1319,6 +1319,23 @@
     }
 
 
+    // --- View Delivery Updates (global scope for onclick) ---
+    function viewDeliveryUpdates() {
+        const orderId = new URLSearchParams(window.location.search).get("id");
+        if (!orderId) { alert("No order ID found."); return; }
+
+        const outForDelivery = document.getElementById('outForDeliveryTimestamp')?.textContent || 'N/A';
+        const delivered = document.getElementById('deliveredTimestamp')?.textContent || 'N/A';
+        const expected = document.getElementById('expectedDeliveryDate')?.textContent || 'N/A';
+
+        let msg = `Delivery Updates for Order #${orderId}\n\n`;
+        msg += `Expected Delivery: ${expected.trim()}\n`;
+        msg += `Out for Delivery: ${outForDelivery.trim()}\n`;
+        msg += `Delivered: ${delivered.trim()}\n`;
+
+        alert(msg);
+    }
+
     // --- Event Listeners for Order Status Buttons ---
     document.addEventListener('DOMContentLoaded', () => {
         const outForDeliveryButton = document.getElementById("outForDeliveryButton");
@@ -1400,23 +1417,6 @@
                     deliveredButton.classList.remove('disabled-button-style');
                 }
             });
-        }
-
-        // View Delivery Updates - shows a summary of delivery status history
-        function viewDeliveryUpdates() {
-            const orderId = new URLSearchParams(window.location.search).get("id");
-            if (!orderId) { alert("No order ID found."); return; }
-
-            const outForDelivery = document.getElementById('outForDeliveryTimestamp')?.textContent || 'N/A';
-            const delivered = document.getElementById('deliveredTimestamp')?.textContent || 'N/A';
-            const expected = document.getElementById('expectedDeliveryDate')?.textContent || 'N/A';
-
-            let msg = `Delivery Updates for Order #${orderId}\n\n`;
-            msg += `Expected Delivery: ${expected.trim()}\n`;
-            msg += `Out for Delivery: ${outForDelivery.trim()}\n`;
-            msg += `Delivered: ${delivered.trim()}\n`;
-
-            alert(msg);
         }
 
         const urlParams = new URLSearchParams(window.location.search);
