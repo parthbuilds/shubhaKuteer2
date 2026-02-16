@@ -3151,13 +3151,15 @@ if (listProductCompare) {
       productElement.setAttribute("data-item", product.id);
       productElement.classList.add(
         "product-item",
-        "px-10",
+        "px-4",
         "pt-6",
         "pb-5",
         "border-r",
         "border-line",
         "cursor-pointer"
       );
+      productElement.style.flex = "1 1 0%";
+      productElement.style.minWidth = "0";
       productElement.innerHTML = `
                 <div class="bg-img w-full aspect-[3/4] rounded-lg overflow-hidden flex-shrink-0">
                     <img src=${product.thumbImage[0]} alt='img' class='w-full h-full object-cover' />
@@ -3174,7 +3176,6 @@ if (listProductCompare) {
       let arrOfStar = "";
       const rateElement = document.createElement("td");
       rateElement.classList.add(
-        "w-full",
         "border",
         "border-line",
         "h-[60px]",
@@ -3206,7 +3207,6 @@ if (listProductCompare) {
       // list price
       const priceElement = document.createElement("td");
       priceElement.classList.add(
-        "w-full",
         "border",
         "border-line",
         "h-[60px]",
@@ -3224,7 +3224,6 @@ if (listProductCompare) {
       // list type
       const typeElement = document.createElement("td");
       typeElement.classList.add(
-        "w-full",
         "border",
         "border-line",
         "h-[60px]",
@@ -3242,7 +3241,6 @@ if (listProductCompare) {
       // list brand
       const brandElement = document.createElement("td");
       brandElement.classList.add(
-        "w-full",
         "border",
         "border-line",
         "h-[60px]",
@@ -3260,7 +3258,6 @@ if (listProductCompare) {
       // list size
       const sizeElement = document.createElement("td");
       sizeElement.classList.add(
-        "w-full",
         "border",
         "border-line",
         "h-[60px]",
@@ -3291,7 +3288,6 @@ if (listProductCompare) {
       // list color
       const colorElement = document.createElement("td");
       colorElement.classList.add(
-        "w-full",
         "border",
         "border-line",
         "h-[60px]",
