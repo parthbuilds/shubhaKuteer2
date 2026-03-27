@@ -1034,8 +1034,7 @@
             if (editProductId) {
                 document.querySelector('h3').textContent = 'Edit Product';
                 document.querySelector('.breadcrumbs .text-tiny:last-child').textContent = 'Edit product';
-                // Wait for categories to load before fully populating? Or just run in parallel.
-                // We'll call loadProductData after initial setup.
+                document.querySelector('.tf-button.w-full').textContent = 'Update Product';
             }
 
             // Helper to show message
