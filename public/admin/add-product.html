@@ -956,7 +956,7 @@
                                                         <span class="text-tiny">Drop your image here or <span
                                                                 class="tf-color">click to browse</span></span>
                                                         <input type="file" name="mainImage" id="mainImageInput"
-                                                            accept="image/*" required>
+                                                            accept="image/*">
                                                     </label>
                                                 </div>
                                             </div>
@@ -1655,7 +1655,20 @@
                         if (v && typeof v === 'object') selectedAttributeVariants = v;
                     } catch (e) { console.error("Error parsing variations", e); }
                     updateVariationsHidden();
-                    // Note: We don't auto-open attribute select, but data is ready.
+                    
+                    // Auto-display saved attribute selections
+                    if (Object.keys(selectedAttributeVariants).length > 0) {
+                        // Trigger display for each saved attribute
+                        Object.keys(selectedAttributeVariants).forEach(attrName => {
+                            // Find if attribute exists in loaded attributes
+                            const attrExists = attributes.some(a => a.attribute_name === attrName);
+                            if (attrExists) {
+                                displayAttributeSelection(attrName);
+                                // Set the dropdown to show this attribute as selected
+                                attributeSelect.value = attrName;
+                            }
+                        });
+                    }
 
                     // Main Image
                     if (product.main_image) {
